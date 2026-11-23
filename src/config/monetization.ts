@@ -15,8 +15,8 @@ export const monetizationConfig = {
   /** Tier 1: Premium Display Ad Networks (Single-domain authority compounds across all /[game]/ subdirectories) */
   ads: {
     adsense: {
-      enabled: false,
-      publisherClient: '', // e.g. 'ca-pub-XXXXXXXXXXXXXXXX' (enable ONLY after public/ads.txt returns HTTP 200)
+      enabled: true,
+      publisherClient: 'ca-pub-2671209221089689',
     },
     journeyGrowSiteId: '', // Journey by Mediavine (apply at 1,000 Tier-1 monthly sessions; $8–$30 RPM)
     nitropaySiteId: '',    // NitroPay gaming vertical ad script ID
