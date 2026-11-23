@@ -1,0 +1,74 @@
+---
+import HubLayout from '../../layouts/HubLayout.astro';
+import GameNav from '../../components/GameNav.astro';
+import MonetizationBar from '../../components/MonetizationBar.astro';
+import { gamesRegistry, type GameModule } from '../../data/games';
+import { hubConfig } from '../../config/hub.config.mjs';
+
+export function getStaticPaths() {
+  return gamesRegistry.map((game) => ({
+    params: { game: game.slug },
+    props: { game },
+  }));
+}
+
+interface Props {
+  game: GameModule;
+}
+const { game } = Astro.props;
+const hasTrades = game.tradeValues.length > 0;
+---
+<HubLayout
+  title={`${game.title} Value List & WFL Trade Calculator — ${hubConfig.brandName}`}
+  description={`Trading value reference and Win/Fair/Lose (WFL) calculator module for ${game.title}.`}
+>
+  <section class="hero">
+    <span class="eyebrow">Economy &amp; WFL Value Module</span>
+    <h1>{game.title} Economy &amp; Trade Values</h1>
+    <p class="subtitle">
+      {hasTrades
+        ? 'Compare item scores, demand ratings, and Win/Fair/Lose trade balance.'
+        : `${game.title} is primarily a solo/co-op progression game without a player auction market. Use the Crafting Calculator for item value margins.`}
+    </p>
+    <GameNav game={game} active="values" />
+  </section>
+
+  <MonetizationBar game={game} />
+
+  {hasTrades ? (
+    <section class="card">
+      <h2 style="margin-top:0;">Indexed Value Reference</h2>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Score</th>
+              <th>Demand</th>
+              <th>Rarity</th>
+              <th>Trend</th>
+            </tr>
+          </thead>
+          <tbody>
+            {game.tradeValues.map((tv) => (
+              <tr>
+                <td><strong>{tv.name}</strong></td>
+                <td>{tv.score.toLocaleString('en-US')}</td>
+                <td>{tv.demand}/10</td>
+                <td><span class="badge">{tv.rarity}</span></td>
+                <td>{tv.trend}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  ) : (
+    <section class="card">
+      <p style="margin:0 0 0.75rem;">
+        Looking for raw-to-crafted profit margins in <strong>{game.title}</strong>? Jump straight to the recursive ratio engine:
+      </p>
+      <a class="btn" href={`/${game.slug}/calculator/`}>Open {game.title} Crafting Calculator →</a>
+    </section>
+  )}
+</HubLayout>

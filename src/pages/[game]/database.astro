@@ -1,0 +1,77 @@
+---
+import HubLayout from '../../layouts/HubLayout.astro';
+import GameNav from '../../components/GameNav.astro';
+import MonetizationBar from '../../components/MonetizationBar.astro';
+import { gamesRegistry, type GameModule } from '../../data/games';
+import { hubConfig } from '../../config/hub.config.mjs';
+
+export function getStaticPaths() {
+  return gamesRegistry.map((game) => ({
+    params: { game: game.slug },
+    props: { game },
+  }));
+}
+
+interface Props {
+  game: GameModule;
+}
+const { game } = Astro.props;
+---
+<HubLayout
+  title={`${game.title} Item Database, Recipes & Drop Sources — ${hubConfig.brandName}`}
+  description={`Searchable item database, crafting recipes, power draw, and drop locations for ${game.title}.`}
+>
+  <section class="hero">
+    <span class="eyebrow">Filterable Item &amp; Recipe Index</span>
+    <h1>{game.title} Item Database</h1>
+    <p class="subtitle">Filter items by name, rarity, category, or crafting source.</p>
+    <GameNav game={game} active="database" />
+  </section>
+
+  <MonetizationBar game={game} />
+
+  <section class="card">
+    <div style="margin-bottom:0.9rem; max-width:420px;">
+      <input id="db-filter" class="input" type="search" placeholder="Filter items, rarity, or facility..." aria-label="Filter items" />
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Category</th>
+            <th>Rarity</th>
+            <th>Base Value</th>
+            <th>Source / Facility</th>
+            <th>Data Status</th>
+          </tr>
+        </thead>
+        <tbody id="db-tbody">
+          {game.items.map((it) => (
+            <tr data-hay={`${it.name} ${it.category} ${it.rarity} ${it.biomeOrSource}`.toLowerCase()}>
+              <td><strong>{it.name}</strong></td>
+              <td>{it.category}</td>
+              <td><span class="badge">{it.rarity}</span></td>
+              <td>{it.baseValue}</td>
+              <td>{it.biomeOrSource}</td>
+              <td style="font-size:0.78rem; color:var(--muted);">{it.verifiedSource}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <script is:inline>
+    const input = document.getElementById('db-filter');
+    const rows = Array.from(document.querySelectorAll('#db-tbody tr'));
+    if (input) {
+      input.addEventListener('input', () => {
+        const q = input.value.trim().toLowerCase();
+        rows.forEach((r) => {
+          r.style.display = !q || (r.getAttribute('data-hay') || '').includes(q) ? '' : 'none';
+        });
+      });
+    }
+  </script>
+</HubLayout>

@@ -1,0 +1,21 @@
+---
+import HubLayout from '../layouts/HubLayout.astro';
+import { hubConfig } from '../config/hub.config.mjs';
+---
+<HubLayout title={`About & Data Verification Method — ${hubConfig.brandName}`} description={`How ${hubConfig.brandName} verifies game data, client recipe tables, and browser tools.`}>
+  <section class="hero">
+    <span class="eyebrow">Editorial &amp; Engineering Method</span>
+    <h1>About {hubConfig.brandName}</h1>
+    <p class="subtitle">Independent game calculators, interactive completion maps, and verified databases.</p>
+  </section>
+  <section class="card" style="margin-top:1.25rem;">
+    <h2>How We Build Tools</h2>
+    <p>
+      {hubConfig.brandName} builds interactive browser utilities—production ratio calculators, local-storage completion maps, and WFL trade checkers—around verified game mechanics and structured game tables rather than generic text rewrites.
+    </p>
+    <h2>Unofficial Fan Reference Disclaimer</h2>
+    <p>
+      {hubConfig.brandName} is not affiliated with, endorsed by, or sponsored by Valve Corporation, Roblox Corporation, or any individual game studio indexed on this domain.
+    </p>
+  </section>
+</HubLayout>

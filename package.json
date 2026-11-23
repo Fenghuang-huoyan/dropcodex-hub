@@ -1,0 +1,16 @@
+{
+  "name": "game-tools-hub",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "indexnow": "node scripts/push-indexnow.mjs"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.0",
+    "astro": "^5.17.1"
+  }
+}

@@ -1,0 +1,65 @@
+---
+import HubLayout from '../layouts/HubLayout.astro';
+import { hubConfig } from '../config/hub.config.mjs';
+import { gamesRegistry } from '../data/games';
+---
+<HubLayout
+  title={`${hubConfig.brandName} — Game Calculators, Interactive Maps & Crafting Databases`}
+  description={hubConfig.tagline}
+>
+  <section class="hero">
+    <span class="eyebrow">Single-Domain Game Tool Engine</span>
+    <h1>{hubConfig.brandName}: Precision Calculators, Interactive Maps &amp; Databases</h1>
+    <p class="subtitle">
+      Built for min-maxers: multi-stage crafting &amp; factory ratio calculators, interactive completion maps with local browser save tracking, and WFL trade checkers.
+    </p>
+    <div style="margin-top: 1rem; max-width: 460px;">
+      <input
+        id="hub-search"
+        class="input"
+        type="search"
+        placeholder="Search game calculators, maps, or genres..."
+        aria-label="Search games"
+      />
+    </div>
+  </section>
+
+  <section aria-label="Supported Games">
+    <h2>Active Game Tool Modules</h2>
+    <div class="grid-cards" id="hub-game-grid">
+      {gamesRegistry.map((game) => (
+        <article class="card" data-search={`${game.title} ${game.genre} ${game.engine}`.toLowerCase()}>
+          <span class="badge">{game.genre}</span>
+          <h3 style="margin: 0.55rem 0 0.35rem;">
+            <a href={`/${game.slug}/`} style="color: var(--text);">{game.title}</a>
+          </h3>
+          <p style="margin: 0 0 0.65rem; font-size: 0.85rem; color: var(--muted);">
+            {game.summary}
+          </p>
+          <p style="margin: 0 0 0.85rem; font-size: 0.76rem; color: var(--accent);">
+            Status: {game.dataStatus}
+          </p>
+          <div style="display:flex; flex-wrap:wrap; gap:0.45rem;">
+            <a class="btn" href={`/${game.slug}/calculator/`}>Calculator</a>
+            <a class="btn btn-outline" href={`/${game.slug}/map/`}>Map</a>
+            <a class="btn btn-outline" href={`/${game.slug}/database/`}>Database</a>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <script is:inline>
+    const searchInput = document.getElementById('hub-search');
+    const cards = Array.from(document.querySelectorAll('#hub-game-grid [data-search]'));
+    if (searchInput) {
+      searchInput.addEventListener('input', () => {
+        const q = searchInput.value.trim().toLowerCase();
+        cards.forEach((card) => {
+          const hay = card.getAttribute('data-search') || '';
+          card.style.display = !q || hay.includes(q) ? '' : 'none';
+        });
+      });
+    }
+  </script>
+</HubLayout>

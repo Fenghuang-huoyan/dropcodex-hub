@@ -1,0 +1,14 @@
+---
+import HubLayout from '../layouts/HubLayout.astro';
+import { hubConfig } from '../config/hub.config.mjs';
+---
+<HubLayout title={`Terms of Service — ${hubConfig.brandName}`} description={`Terms of Service for using ${hubConfig.brandName} calculators, maps, and databases.`}>
+  <section class="hero">
+    <span class="eyebrow">Legal</span>
+    <h1>Terms of Service</h1>
+    <p class="subtitle">Last updated: 23 November 2026.</p>
+  </section>
+  <section class="card" style="margin-top:1.25rem;">
+    <p>All calculators, maps, and reference tables on {hubConfig.brandName} are provided "as is" for personal informational use. Game patches may alter recipes or item values at any time. All game trademarks belong to their respective owners.</p>
+  </section>
+</HubLayout>

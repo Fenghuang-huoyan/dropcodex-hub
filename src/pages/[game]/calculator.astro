@@ -1,0 +1,147 @@
+---
+import HubLayout from '../../layouts/HubLayout.astro';
+import GameNav from '../../components/GameNav.astro';
+import MonetizationBar from '../../components/MonetizationBar.astro';
+import { gamesRegistry, type GameModule } from '../../data/games';
+import { hubConfig } from '../../config/hub.config.mjs';
+
+export function getStaticPaths() {
+  return gamesRegistry.map((game) => ({
+    params: { game: game.slug },
+    props: { game },
+  }));
+}
+
+interface Props {
+  game: GameModule;
+}
+const { game } = Astro.props;
+const craftableItems = game.items.filter((i) => i.recipe && i.recipe.length > 0);
+const serializedItems = JSON.stringify(game.items);
+---
+<HubLayout
+  title={`${game.title} Crafting, Production Ratio & Profit Calculator — ${hubConfig.brandName}`}
+  description={`Calculate exact raw resource requirements, smelter ratios, power load, and profit margin for ${game.title}.`}
+>
+  <section class="hero">
+    <span class="eyebrow">Multi-Stage Crafting &amp; Throughput Engine</span>
+    <h1>{game.title} Crafting &amp; Ratio Calculator</h1>
+    <p class="subtitle">
+      Select any craftable item and target output per minute to recursively break down raw materials, machine counts, power draw, and value margin.
+    </p>
+    <GameNav game={game} active="calculator" />
+  </section>
+
+  <MonetizationBar game={game} />
+
+  <section class="card" aria-label="Production Ratio Calculator">
+    <div class="grid-cards" style="margin-top:0;">
+      <label>
+        <span style="display:block; font-size:0.82rem; font-weight:700; margin-bottom:0.3rem;">Target Output Item</span>
+        <select id="calc-target-item" class="input">
+          {(craftableItems.length > 0 ? craftableItems : game.items).map((it) => (
+            <option value={it.id}>{it.name} (Value: {it.baseValue})</option>
+          ))}
+        </select>
+      </label>
+      <label>
+        <span style="display:block; font-size:0.82rem; font-weight:700; margin-bottom:0.3rem;">Target Units / Minute</span>
+        <input id="calc-rate" class="input" type="number" min="1" max="10000" step="1" value="30" />
+      </label>
+    </div>
+
+    <div class="grid-cards" id="calc-summary">
+      <div class="card" style="background:var(--bg);">
+        <span style="font-size:0.76rem; color:var(--muted);">Gross Output Value / Min</span>
+        <strong id="out-gross" style="display:block; font-size:1.25rem; color:var(--emerald);">—</strong>
+      </div>
+      <div class="card" style="background:var(--bg);">
+        <span style="font-size:0.76rem; color:var(--muted);">Raw Material Cost / Min</span>
+        <strong id="out-cost" style="display:block; font-size:1.25rem;">—</strong>
+      </div>
+      <div class="card" style="background:var(--bg);">
+        <span style="font-size:0.76rem; color:var(--muted);">Net Value Added &amp; Power</span>
+        <strong id="out-net" style="display:block; font-size:1.25rem; color:var(--accent);">—</strong>
+      </div>
+    </div>
+
+    <h2 style="margin-top:1rem;">Recursive Bill of Materials &amp; Machine Count</h2>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Material / Stage</th>
+            <th>Required / Min</th>
+            <th>Machines Needed</th>
+            <th>Source / Facility</th>
+          </tr>
+        </thead>
+        <tbody id="calc-bom-rows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <script is:inline define:vars={{ serializedItems }}>
+    const items = JSON.parse(serializedItems);
+    const itemMap = new Map(items.map((i) => [i.id, i]));
+    const targetSel = document.getElementById('calc-target-item');
+    const rateInput = document.getElementById('calc-rate');
+    const bomBody = document.getElementById('calc-bom-rows');
+    const grossEl = document.getElementById('out-gross');
+    const costEl = document.getElementById('out-cost');
+    const netEl = document.getElementById('out-net');
+
+    function compute() {
+      const targetId = targetSel.value;
+      const ratePerMin = Math.max(1, parseFloat(rateInput.value || '1') || 1);
+      const rootItem = itemMap.get(targetId);
+      if (!rootItem) return;
+
+      const totals = new Map();
+      let totalPowerKw = 0;
+      let rawCost = 0;
+
+      function walk(id, neededPerMin) {
+        const node = itemMap.get(id);
+        if (!node) return;
+        totals.set(id, (totals.get(id) || 0) + neededPerMin);
+        const craftSec = node.craftTimeSec || 4;
+        const perMachinePerMin = 60 / craftSec;
+        const machines = neededPerMin / perMachinePerMin;
+        totalPowerKw += machines * (node.powerKw || 0);
+
+        if (node.recipe && node.recipe.length > 0) {
+          node.recipe.forEach((ing) => walk(ing.itemId, neededPerMin * ing.qty));
+        } else {
+          rawCost += neededPerMin * (node.baseValue || 0);
+        }
+      }
+
+      walk(targetId, ratePerMin);
+      const gross = ratePerMin * (rootItem.baseValue || 0);
+      const net = gross - rawCost;
+
+      grossEl.textContent = gross.toLocaleString('en-US') + ' pts/min';
+      costEl.textContent = rawCost.toLocaleString('en-US') + ' pts/min';
+      netEl.textContent = '+' + net.toLocaleString('en-US') + ' (' + Math.ceil(totalPowerKw) + ' kW)';
+
+      bomBody.innerHTML = '';
+      totals.forEach((reqRate, id) => {
+        const node = itemMap.get(id);
+        const craftSec = node.craftTimeSec || 4;
+        const machines = (reqRate / (60 / craftSec)).toFixed(1);
+        const tr = document.createElement('tr');
+        tr.innerHTML =
+          '<td><strong>' + node.name + '</strong></td>' +
+          '<td>' + reqRate.toFixed(1) + ' / min</td>' +
+          '<td>' + machines + 'x</td>' +
+          '<td>' + node.biomeOrSource + '</td>';
+        bomBody.appendChild(tr);
+      });
+    }
+
+    targetSel.addEventListener('change', compute);
+    rateInput.addEventListener('input', compute);
+    compute();
+  </script>
+</HubLayout>

@@ -1,0 +1,87 @@
+---
+import '../styles/global.css';
+import { hubConfig } from '../config/hub.config.mjs';
+import { monetizationConfig } from '../config/monetization';
+
+interface Props {
+  title: string;
+  description: string;
+}
+const { title, description } = Astro.props;
+const canonical = new URL(Astro.url.pathname, hubConfig.siteUrl).href;
+const gaId = hubConfig.gaMeasurementId.trim();
+const adsenseClient = monetizationConfig.ads.adsense.enabled
+  ? monetizationConfig.ads.adsense.publisherClient.trim()
+  : '';
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content={hubConfig.brandName} />
+    {gaId && (
+      <>
+        <script async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}></script>
+        <script is:inline define:vars={{ gaId }}>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){window.dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', gaId);
+        </script>
+      </>
+    )}
+    {adsenseClient && (
+      <script
+        async
+        src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`}
+        crossorigin="anonymous"
+      ></script>
+    )}
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="/">
+          <span class="brand-dot"></span>
+          <span>{hubConfig.brandName}</span>
+        </a>
+        <nav class="nav-links" aria-label="Primary">
+          <a href="/">All Games</a>
+          <a href="/main-sequence/calculator/">Main Sequence Calc</a>
+          <a href="/below-the-stone/calculator/">Below the Stone 1.0</a>
+          <a href="/about/">About</a>
+          <a href="/contact/">Contact</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-links">
+          <a href="/">Home</a>
+          <a href="/about/">About &amp; Data Method</a>
+          <a href="/privacy/">Privacy Policy</a>
+          <a href="/terms/">Terms of Service</a>
+          <a href="/contact/">Contact</a>
+        </div>
+        <p>
+          {hubConfig.brandName} ({hubConfig.domain}) is an independent, unofficial fan-built gaming tool &amp; database hub.
+          All game titles, assets, and trademarks belong to their respective developers and publishers.
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>

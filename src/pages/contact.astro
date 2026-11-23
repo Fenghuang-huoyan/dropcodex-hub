@@ -1,0 +1,14 @@
+---
+import HubLayout from '../layouts/HubLayout.astro';
+import { hubConfig } from '../config/hub.config.mjs';
+---
+<HubLayout title={`Contact — ${hubConfig.brandName}`} description={`Contact editorial maintainers of ${hubConfig.brandName}.`}>
+  <section class="hero">
+    <span class="eyebrow">Support &amp; Corrections</span>
+    <h1>Contact {hubConfig.brandName}</h1>
+    <p class="subtitle">Report recipe updates, patch changes, or compliance inquiries.</p>
+  </section>
+  <section class="card" style="margin-top:1.25rem;">
+    <p>For data corrections, copyright questions, or partnership inquiries regarding <strong>{hubConfig.domain}</strong>, write to: <code>{hubConfig.editorialEmail}</code>.</p>
+  </section>
+</HubLayout>

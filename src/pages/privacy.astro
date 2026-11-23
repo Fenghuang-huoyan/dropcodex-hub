@@ -1,0 +1,19 @@
+---
+import HubLayout from '../layouts/HubLayout.astro';
+import { hubConfig } from '../config/hub.config.mjs';
+---
+<HubLayout title={`Privacy Policy — ${hubConfig.brandName}`} description={`Privacy Policy, localStorage usage, Google Analytics, Google AdSense cookies, and affiliate disclosures for ${hubConfig.brandName}.`}>
+  <section class="hero">
+    <span class="eyebrow">Compliance</span>
+    <h1>Privacy Policy</h1>
+    <p class="subtitle">Effective date: 23 November 2026.</p>
+  </section>
+  <section class="card" style="margin-top:1.25rem;">
+    <h2>1. Local Browser Storage</h2>
+    <p>Interactive map pins, calculator presets, and checklists save progress strictly inside your own browser's <code>localStorage</code>. Imported save files are parsed locally in memory and never uploaded to our servers.</p>
+    <h2>2. Analytics &amp; Advertising Cookies (Google AdSense)</h2>
+    <p>We use Google Analytics to measure aggregated traffic and may display advertisements through Google AdSense or certified gaming ad networks. Third-party vendors, including Google, use cookies to serve ads based on prior visits. You may opt out of personalized advertising at <a href="https://adssettings.google.com/" target="_blank" rel="noopener noreferrer">adssettings.google.com</a>.</p>
+    <h2>3. Affiliate Disclosure</h2>
+    <p>Marked partner links to authorized Steam key retailers, UID top-up services, or item marketplaces may generate a referral commission at no extra cost to you.</p>
+  </section>
+</HubLayout>

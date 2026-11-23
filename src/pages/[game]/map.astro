@@ -1,0 +1,178 @@
+---
+import HubLayout from '../../layouts/HubLayout.astro';
+import GameNav from '../../components/GameNav.astro';
+import MonetizationBar from '../../components/MonetizationBar.astro';
+import { gamesRegistry, type GameModule } from '../../data/games';
+import { hubConfig } from '../../config/hub.config.mjs';
+
+export function getStaticPaths() {
+  return gamesRegistry.map((game) => ({
+    params: { game: game.slug },
+    props: { game },
+  }));
+}
+
+interface Props {
+  game: GameModule;
+}
+const { game } = Astro.props;
+const storageKey = `dropcodex_map_${game.slug}_v1`;
+const pinsJson = JSON.stringify(game.mapPins);
+---
+<HubLayout
+  title={`${game.title} Interactive Map & Completion Save Tracker — ${hubConfig.brandName}`}
+  description={`Interactive node map, resource locations, extraction points, and browser save completion tracker for ${game.title}.`}
+>
+  <section class="hero">
+    <span class="eyebrow">Interactive Coordinate Map &amp; Save Check</span>
+    <h1>{game.title} Interactive Map</h1>
+    <p class="subtitle">
+      Click any map marker or checklist row to mark it found in your browser's <code>localStorage</code>, or import a JSON completion export to highlight missing nodes.
+    </p>
+    <GameNav game={game} active="map" />
+  </section>
+
+  <MonetizationBar game={game} />
+
+  <section class="card">
+    <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:0.75rem; margin-bottom:1rem;">
+      <div style="display:flex; flex-wrap:wrap; gap:0.45rem;" id="map-filters">
+        <button class="btn" type="button" data-cat="ALL">All Pins ({game.mapPins.length})</button>
+        <button class="btn btn-outline" type="button" data-cat="Resource">Resources</button>
+        <button class="btn btn-outline" type="button" data-cat="Extraction">Extraction</button>
+        <button class="btn btn-outline" type="button" data-cat="Boss">Bosses</button>
+        <button class="btn btn-outline" type="button" data-cat="Shrine / Upgrade">Upgrades</button>
+      </div>
+      <div style="display:flex; flex-wrap:wrap; align-items:center; gap:0.5rem;">
+        <span id="map-progress-badge" class="badge">0 / {game.mapPins.length} Found</span>
+        <label class="btn btn-outline" style="cursor:pointer;">
+          Import .JSON Save
+          <input id="save-json-input" type="file" accept=".json" style="display:none;" />
+        </label>
+        <button id="map-reset-btn" class="btn btn-outline" type="button">Reset</button>
+      </div>
+    </div>
+
+    <div
+      id="map-canvas"
+      style="position:relative; width:100%; height:360px; border-radius:10px; border:1px solid var(--border); background: radial-gradient(circle at 50% 50%, #1d2d44 0%, #0d1321 100%); overflow:hidden;"
+    >
+      {game.mapPins.map((pin) => (
+        <button
+          type="button"
+          class="map-pin-btn"
+          data-pin-id={pin.id}
+          data-pin-cat={pin.category}
+          title={`${pin.title} (${pin.category})`}
+          style={`position:absolute; left:${pin.xPercent}%; top:${pin.yPercent}%; transform:translate(-50%,-50%); padding:0.3rem 0.55rem; border-radius:999px; border:2px solid var(--accent); background:var(--surface); color:var(--text); font-size:0.75rem; font-weight:700; cursor:pointer;`}
+        >
+          {pin.title}
+        </button>
+      ))}
+    </div>
+
+    <h2 style="margin-top:1.25rem;">Node Directory &amp; Completion Log</h2>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Done</th>
+            <th>Location</th>
+            <th>Category</th>
+            <th>Coords</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          {game.mapPins.map((pin) => (
+            <tr data-row-cat={pin.category}>
+              <td>
+                <input type="checkbox" class="pin-check" data-check-id={pin.id} aria-label={`Mark ${pin.title} completed`} />
+              </td>
+              <td><strong>{pin.title}</strong></td>
+              <td><span class="badge">{pin.category}</span></td>
+              <td>{pin.xPercent}, {pin.yPercent}</td>
+              <td>{pin.note}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <script is:inline define:vars={{ storageKey, pinsJson }}>
+    const pins = JSON.parse(pinsJson);
+    let foundSet = new Set();
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (raw) foundSet = new Set(JSON.parse(raw));
+    } catch {}
+
+    const badge = document.getElementById('map-progress-badge');
+    const checks = Array.from(document.querySelectorAll('.pin-check'));
+    const pinBtns = Array.from(document.querySelectorAll('.map-pin-btn'));
+
+    function syncUI() {
+      checks.forEach((ch) => {
+        ch.checked = foundSet.has(ch.getAttribute('data-check-id'));
+      });
+      pinBtns.forEach((btn) => {
+        const done = foundSet.has(btn.getAttribute('data-pin-id'));
+        btn.style.opacity = done ? '0.42' : '1';
+        btn.style.borderColor = done ? '#10b981' : 'var(--accent)';
+      });
+      if (badge) badge.textContent = foundSet.size + ' / ' + pins.length + ' Found';
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(Array.from(foundSet)));
+      } catch {}
+    }
+
+    function togglePin(id) {
+      if (foundSet.has(id)) foundSet.delete(id);
+      else foundSet.add(id);
+      syncUI();
+    }
+
+    checks.forEach((ch) => ch.addEventListener('change', () => togglePin(ch.getAttribute('data-check-id'))));
+    pinBtns.forEach((btn) => btn.addEventListener('click', () => togglePin(btn.getAttribute('data-pin-id'))));
+
+    document.querySelectorAll('#map-filters button').forEach((fBtn) => {
+      fBtn.addEventListener('click', () => {
+        const cat = fBtn.getAttribute('data-cat');
+        pinBtns.forEach((b) => {
+          b.style.display = cat === 'ALL' || b.getAttribute('data-pin-cat') === cat ? '' : 'none';
+        });
+        document.querySelectorAll('[data-row-cat]').forEach((row) => {
+          row.style.display = cat === 'ALL' || row.getAttribute('data-row-cat') === cat ? '' : 'none';
+        });
+      });
+    });
+
+    const resetBtn = document.getElementById('map-reset-btn');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        foundSet.clear();
+        syncUI();
+      });
+    }
+
+    const fileInput = document.getElementById('save-json-input');
+    if (fileInput) {
+      fileInput.addEventListener('change', async (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        try {
+          const text = await file.text();
+          const parsed = JSON.parse(text);
+          const arr = Array.isArray(parsed) ? parsed : (parsed.completedPins || []);
+          arr.forEach((id) => {
+            if (typeof id === 'string') foundSet.add(id);
+          });
+          syncUI();
+        } catch {}
+      });
+    }
+
+    syncUI();
+  </script>
+</HubLayout>

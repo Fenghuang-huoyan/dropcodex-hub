@@ -1,0 +1,56 @@
+---
+import HubLayout from '../../layouts/HubLayout.astro';
+import GameNav from '../../components/GameNav.astro';
+import MonetizationBar from '../../components/MonetizationBar.astro';
+import { gamesRegistry, type GameModule } from '../../data/games';
+import { hubConfig } from '../../config/hub.config.mjs';
+
+export function getStaticPaths() {
+  return gamesRegistry.map((game) => ({
+    params: { game: game.slug },
+    props: { game },
+  }));
+}
+
+interface Props {
+  game: GameModule;
+}
+const { game } = Astro.props;
+---
+<HubLayout
+  title={`${game.title} Tools, Crafting Calculator & Interactive Map — ${hubConfig.brandName}`}
+  description={`Interactive crafting ratio calculator, map tracker, and item database for ${game.title} (${game.releaseLabel}).`}
+>
+  <section class="hero">
+    <span class="eyebrow">{game.releaseLabel} · {game.engine}</span>
+    <h1>{game.title} Tools &amp; Database</h1>
+    <p class="subtitle">{game.summary}</p>
+    <GameNav game={game} active="overview" />
+  </section>
+
+  <MonetizationBar game={game} />
+
+  <div class="grid-cards">
+    <div class="card">
+      <h3>1. Crafting &amp; Production Ratio Calculator</h3>
+      <p style="font-size:0.88rem; color:var(--muted);">
+        Compute raw ore feedstock, multi-tier intermediate assemblies, power draw (kW), and net value per minute.
+      </p>
+      <a class="btn" href={`/${game.slug}/calculator/`}>Open Calculator →</a>
+    </div>
+    <div class="card">
+      <h3>2. Interactive Map &amp; Save Scanner</h3>
+      <p style="font-size:0.88rem; color:var(--muted);">
+        Filter resource nodes, extraction points, and shrines with local browser progress tracking and JSON save import.
+      </p>
+      <a class="btn" href={`/${game.slug}/map/`}>Open Interactive Map →</a>
+    </div>
+    <div class="card">
+      <h3>3. Searchable Item &amp; Drop Database</h3>
+      <p style="font-size:0.88rem; color:var(--muted);">
+        Filter {game.items.length} indexed entries by category, rarity, biome source, and crafting recipe requirements.
+      </p>
+      <a class="btn" href={`/${game.slug}/database/`}>Browse Database →</a>
+    </div>
+  </div>
+</HubLayout>

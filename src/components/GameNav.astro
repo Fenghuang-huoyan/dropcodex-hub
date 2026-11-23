@@ -1,0 +1,16 @@
+---
+import type { GameModule } from '../data/games';
+
+interface Props {
+  game: GameModule;
+  active: 'overview' | 'calculator' | 'map' | 'database' | 'values';
+}
+const { game, active } = Astro.props;
+---
+<nav class="tool-tabs" aria-label={`${game.title} tools`}>
+  <a class:list={['tool-tab', active === 'overview' && 'active']} href={`/${game.slug}/`}>Overview</a>
+  <a class:list={['tool-tab', active === 'calculator' && 'active']} href={`/${game.slug}/calculator/`}>Crafting &amp; Yield Calculator</a>
+  <a class:list={['tool-tab', active === 'map' && 'active']} href={`/${game.slug}/map/`}>Interactive Map &amp; Save Check</a>
+  <a class:list={['tool-tab', active === 'database' && 'active']} href={`/${game.slug}/database/`}>Item Database</a>
+  <a class:list={['tool-tab', active === 'values' && 'active']} href={`/${game.slug}/values/`}>Trade / WFL Values</a>
+</nav>
