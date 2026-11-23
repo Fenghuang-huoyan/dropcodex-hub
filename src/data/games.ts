@@ -3,16 +3,18 @@ export type RecipeIngredient = {
   qty: number;
 };
 
+export type RarityTier = 'Common' | 'Uncommon' | 'Rare' | 'Epic' | 'Legendary';
+
 export type GameItem = {
   id: string;
+  icon: string;
   name: string;
   category: string;
-  rarity: string;
+  rarity: RarityTier;
   baseValue: number;
   craftTimeSec?: number;
   powerKw?: number;
   biomeOrSource: string;
-  verifiedSource: string;
   recipe?: RecipeIngredient[];
 };
 
@@ -27,23 +29,29 @@ export type MapPin = {
 
 export type TradeEntry = {
   name: string;
+  icon: string;
   score: number;
   demand: number;
-  rarity: string;
+  rarity: RarityTier;
   trend: 'Rising' | 'Stable' | 'Fluctuating';
 };
 
 export type GameModule = {
   slug: string;
   title: string;
-  steamAppId?: number;
+  steamAppId: number;
+  statusBadge: string;
   releaseLabel: string;
   engine: string;
   genre: string;
   officialStoreUrl: string;
   priceLabel: string;
-  dataStatus: string;
   summary: string;
+  art: {
+    header: string;
+    hero: string;
+    mapBg: string;
+  };
   affiliateLinks: {
     steamKeyUrl?: string;
     eldoradoUrl?: string;
@@ -54,81 +62,75 @@ export type GameModule = {
   tradeValues: TradeEntry[];
 };
 
-/**
- * Multi-game registry.
- * Adding a new game after AssetRipper / FModel client extraction takes <10 minutes:
- * drop extracted JSON arrays into a new entry here and Astro automatically builds:
- * - /<slug>/
- * - /<slug>/calculator/
- * - /<slug>/map/
- * - /<slug>/database/
- * - /<slug>/values/
- */
 export const gamesRegistry: GameModule[] = [
   {
     slug: 'main-sequence',
     title: 'Main Sequence',
     steamAppId: 2487190,
-    releaseLabel: 'Early Access · 12 Nov 2026',
-    engine: 'Unity (AssetRipper Ready)',
-    genre: 'Space Factory Automation & Ship Builder',
+    statusBadge: 'EARLY ACCESS · DEMO LIVE',
+    releaseLabel: 'Released 12 Nov 2026',
+    engine: 'Space Factory & Ship Sim',
+    genre: 'Factory Automation · Space Sim',
     officialStoreUrl: 'https://store.steampowered.com/app/2487190/Main_Sequence/',
-    priceLabel: '$19.99 USD (Free Demo Available)',
-    dataStatus: 'Architecture Demo · Ready for Unity Client JSON Import',
+    priceLabel: '$19.99 · Free Demo on Steam',
     summary:
-      'First-person space-sim and factory automation builder by Tumbling Dumpling Studio. Built for multi-stage smelting ratio calculations, power load balancing, and module databases.',
-    affiliateLinks: {
-      steamKeyUrl: '',
+      'Design modular starships and automate orbital production lines. Calculate exact smelter-to-assembler ratios, kW power draw, and raw asteroid ore throughput.',
+    art: {
+      header: '/images/games/main-sequence/header.jpg',
+      hero: '/images/games/main-sequence/hero.jpg',
+      mapBg: '/images/games/main-sequence/map-bg.jpg',
     },
+    affiliateLinks: { steamKeyUrl: '' },
     items: [
       {
         id: 'raw-iron-ore',
-        name: 'Raw Iron Ore',
-        category: 'Raw Resource',
+        icon: '🪨',
+        name: 'Raw Ferrous Ore',
+        category: 'Raw Ore',
         rarity: 'Common',
         baseValue: 10,
         craftTimeSec: 2,
         powerKw: 5,
-        biomeOrSource: 'Asteroid Belt Mining Drill',
-        verifiedSource: 'Template Schema (Replace via AssetRipper JSON)',
+        biomeOrSource: 'Asteroid Mining Drill',
       },
       {
         id: 'copper-ore',
-        name: 'Raw Copper Ore',
-        category: 'Raw Resource',
+        icon: '🟠',
+        name: 'Raw Cupric Ore',
+        category: 'Raw Ore',
         rarity: 'Common',
         baseValue: 12,
         craftTimeSec: 2,
         powerKw: 5,
-        biomeOrSource: 'Asteroid Belt Mining Drill',
-        verifiedSource: 'Template Schema (Replace via AssetRipper JSON)',
+        biomeOrSource: 'Asteroid Mining Drill',
       },
       {
         id: 'refined-hull-plate',
-        name: 'Refined Hull Plate',
-        category: 'Intermediate',
+        icon: '🛡️',
+        name: 'Refined Hull Plating',
+        category: 'Structural',
         rarity: 'Uncommon',
         baseValue: 38,
         craftTimeSec: 4,
         powerKw: 15,
-        biomeOrSource: 'Smelter Array',
-        verifiedSource: 'Template Schema (Replace via AssetRipper JSON)',
+        biomeOrSource: 'Arc Smelter',
         recipe: [{ itemId: 'raw-iron-ore', qty: 2 }],
       },
       {
         id: 'insulated-conduit',
-        name: 'Insulated Conduit',
-        category: 'Intermediate',
+        icon: '🔌',
+        name: 'Insulated Power Conduit',
+        category: 'Component',
         rarity: 'Uncommon',
         baseValue: 45,
         craftTimeSec: 3,
         powerKw: 12,
         biomeOrSource: 'Wire Extruder',
-        verifiedSource: 'Template Schema (Replace via AssetRipper JSON)',
         recipe: [{ itemId: 'copper-ore', qty: 2 }],
       },
       {
         id: 'thruster-manifold',
+        icon: '🚀',
         name: 'Thruster Manifold Assembly',
         category: 'Ship Module',
         rarity: 'Rare',
@@ -136,69 +138,87 @@ export const gamesRegistry: GameModule[] = [
         craftTimeSec: 8,
         powerKw: 40,
         biomeOrSource: 'Orbital Assembler',
-        verifiedSource: 'Template Schema (Replace via AssetRipper JSON)',
         recipe: [
           { itemId: 'refined-hull-plate', qty: 2 },
           { itemId: 'insulated-conduit', qty: 1 },
         ],
       },
+      {
+        id: 'fusion-regulator',
+        icon: '⚛️',
+        name: 'Reactor Flux Regulator',
+        category: 'Power Core',
+        rarity: 'Epic',
+        baseValue: 420,
+        craftTimeSec: 12,
+        powerKw: 75,
+        biomeOrSource: 'Precision Fabricator',
+        recipe: [
+          { itemId: 'thruster-manifold', qty: 2 },
+          { itemId: 'insulated-conduit', qty: 2 },
+        ],
+      },
     ],
     mapPins: [
-      { id: 'ms-pin-1', title: 'Starter Orbital Station Dock', category: 'Extraction', xPercent: 50, yPercent: 50, note: 'Primary cargo offload & ship blueprint terminal.' },
-      { id: 'ms-pin-2', title: 'High-Density Iron Cluster', category: 'Resource', xPercent: 28, yPercent: 34, note: 'Early automation mining node.' },
-      { id: 'ms-pin-3', title: 'Copper & Silicate Ridge', category: 'Resource', xPercent: 72, yPercent: 38, note: 'Conduit production feedstock.' },
-      { id: 'ms-pin-4', title: 'Derelict Relay Beacon', category: 'Shrine / Upgrade', xPercent: 64, yPercent: 71, note: 'Tech unlock scan target.' },
+      { id: 'ms-pin-1', title: 'Orbital Drydock Terminal', category: 'Extraction', xPercent: 50, yPercent: 48, note: 'Primary cargo offload & ship hull assembly bay.' },
+      { id: 'ms-pin-2', title: 'Dense Ferrous Asteroid Cluster', category: 'Resource', xPercent: 26, yPercent: 34, note: 'High-yield starter iron vein for hull plating.' },
+      { id: 'ms-pin-3', title: 'Cupric & Silicate Belt', category: 'Resource', xPercent: 74, yPercent: 36, note: 'Primary feedstock for power conduits and circuitry.' },
+      { id: 'ms-pin-4', title: 'Derelict Telemetry Beacon', category: 'Shrine / Upgrade', xPercent: 65, yPercent: 72, note: 'Unlocks tier-2 automation schematic nodes.' },
+      { id: 'ms-pin-5', title: 'Rogue Drone Patrol Sector', category: 'Boss', xPercent: 24, yPercent: 70, note: 'Guarded salvage pocket with rare reactor parts.' },
     ],
     tradeValues: [],
   },
   {
     slug: 'below-the-stone',
-    title: 'Below the Stone (1.0)',
+    title: 'Below the Stone',
     steamAppId: 1170230,
-    releaseLabel: '1.0 Full Launch · 17 Nov 2026',
-    engine: 'Unity (AssetRipper Ready)',
-    genre: 'Extraction Mining Roguelike',
+    statusBadge: '1.0 FULL LAUNCH',
+    releaseLabel: '1.0 Update · 17 Nov 2026',
+    engine: '9 New Biomes & Layer 3',
+    genre: 'Extraction Mining · Roguelike',
     officialStoreUrl: 'https://store.steampowered.com/app/1170230/Below_the_Stone/',
-    priceLabel: '$11.99 USD',
-    dataStatus: 'Architecture Demo · Ready for 1.0 Layer-3 Biome & Forge Dump',
+    priceLabel: '$11.99 USD on Steam',
     summary:
-      'Dwarven extraction-mining roguelike by Strollart & Apogee Entertainment. Version 1.0 adds Layer 3 and 9 new biomes—ideal for smelting tree calculators and biome drop tables.',
-    affiliateLinks: {
-      steamKeyUrl: '',
+      'Descend into procedural dwarven caverns across Layer 3 and 9 new 1.0 biomes. Plan smelting ingot trees, pickaxe tier upgrades, and extraction pod loadouts.',
+    art: {
+      header: '/images/games/below-the-stone/header.jpg',
+      hero: '/images/games/below-the-stone/hero.jpg',
+      mapBg: '/images/games/below-the-stone/map-bg.jpg',
     },
+    affiliateLinks: { steamKeyUrl: '' },
     items: [
       {
         id: 'tin-chunk',
+        icon: '⚪',
         name: 'Tin Ore Chunk',
-        category: 'Ore',
+        category: 'Raw Ore',
         rarity: 'Common',
         baseValue: 8,
         craftTimeSec: 3,
         powerKw: 0,
-        biomeOrSource: 'Layer 1 Caverns',
-        verifiedSource: 'Template Schema (Replace via AssetRipper JSON)',
+        biomeOrSource: 'Layer 1 Shallow Caverns',
       },
       {
         id: 'copper-chunk',
+        icon: '🟫',
         name: 'Copper Ore Chunk',
-        category: 'Ore',
+        category: 'Raw Ore',
         rarity: 'Common',
         baseValue: 10,
         craftTimeSec: 3,
         powerKw: 0,
-        biomeOrSource: 'Layer 1 Caverns',
-        verifiedSource: 'Template Schema (Replace via AssetRipper JSON)',
+        biomeOrSource: 'Layer 1 Shallow Caverns',
       },
       {
         id: 'bronze-ingot',
-        name: 'Bronze Ingot',
-        category: 'Ingot',
+        icon: '🟧',
+        name: 'Dwarven Bronze Ingot',
+        category: 'Smelted Bar',
         rarity: 'Uncommon',
         baseValue: 32,
         craftTimeSec: 5,
         powerKw: 0,
-        biomeOrSource: 'Kingdom Smelter',
-        verifiedSource: 'Template Schema (Replace via AssetRipper JSON)',
+        biomeOrSource: 'Kingdom Furnace',
         recipe: [
           { itemId: 'copper-chunk', qty: 2 },
           { itemId: 'tin-chunk', qty: 1 },
@@ -206,26 +226,119 @@ export const gamesRegistry: GameModule[] = [
       },
       {
         id: 'bronze-pickaxe',
-        name: 'Dwarven Bronze Pickaxe',
-        category: 'Equipment',
+        icon: '⛏️',
+        name: 'Reinforced Bronze Pickaxe',
+        category: 'Mining Gear',
         rarity: 'Rare',
         baseValue: 110,
         craftTimeSec: 6,
         powerKw: 0,
-        biomeOrSource: 'Anvil Forge',
-        verifiedSource: 'Template Schema (Replace via AssetRipper JSON)',
+        biomeOrSource: 'Kingdom Anvil',
         recipe: [{ itemId: 'bronze-ingot', qty: 3 }],
+      },
+      {
+        id: 'deep-armor-chest',
+        icon: '🥋',
+        name: 'Layer-2 Delver Cuirass',
+        category: 'Armor',
+        rarity: 'Epic',
+        baseValue: 260,
+        craftTimeSec: 10,
+        powerKw: 0,
+        biomeOrSource: 'Master Runesmith',
+        recipe: [{ itemId: 'bronze-ingot', qty: 5 }],
       },
     ],
     mapPins: [
-      { id: 'bts-pin-1', title: 'Drill Pod Extraction Point', category: 'Extraction', xPercent: 48, yPercent: 46, note: 'Bank mined ores before hull breach.' },
-      { id: 'bts-pin-2', title: 'Fungal Cavern Vein', category: 'Resource', xPercent: 25, yPercent: 62, note: 'Layer 1–2 ore pocket.' },
-      { id: 'bts-pin-3', title: 'Layer Boss Lair Marker', category: 'Boss', xPercent: 78, yPercent: 28, note: 'High-tier crafting catalyst drop.' },
+      { id: 'bts-pin-1', title: 'Drill Pod Extraction Zone', category: 'Extraction', xPercent: 48, yPercent: 46, note: 'Secure mined ores into bank storage before cave-in.' },
+      { id: 'bts-pin-2', title: 'Glowing Fungal Vein', category: 'Resource', xPercent: 27, yPercent: 62, note: 'Dense copper/tin pocket with alchemy spores.' },
+      { id: 'bts-pin-3', title: 'Crystal Chasm Vault', category: 'Shrine / Upgrade', xPercent: 68, yPercent: 66, note: 'Rare chest spawn & rune altar.' },
+      { id: 'bts-pin-4', title: 'Layer Guardian Arena', category: 'Boss', xPercent: 76, yPercent: 28, note: 'Boss encounter required for deeper layer unlock.' },
     ],
     tradeValues: [
-      { name: 'Prismatic Core (Sample)', score: 1200, demand: 9, rarity: 'Legendary', trend: 'Rising' },
-      { name: 'Deep Mithril Bar (Sample)', score: 450, demand: 8, rarity: 'Epic', trend: 'Stable' },
-      { name: 'Bronze Ingot Pack (Sample)', score: 50, demand: 5, rarity: 'Uncommon', trend: 'Stable' },
+      { name: 'Abyssal Core Catalyst', icon: '💎', score: 1200, demand: 9, rarity: 'Legendary', trend: 'Rising' },
+      { name: 'Mithril Ingot Stack', icon: '🟦', score: 450, demand: 8, rarity: 'Epic', trend: 'Stable' },
+      { name: 'Bronze Expedition Kit', icon: '⛏️', score: 95, demand: 6, rarity: 'Rare', trend: 'Stable' },
+    ],
+  },
+  {
+    slug: 'noble-fates',
+    title: 'Noble Fates',
+    steamAppId: 1769420,
+    statusBadge: '1.0 FULL LAUNCH',
+    releaseLabel: '1.0 Release · 12 Nov 2026',
+    engine: '1,500+ Reviews Colony RPG',
+    genre: 'Colony Sim · Kingdom Strategy',
+    officialStoreUrl: 'https://store.steampowered.com/app/1769420/Noble_Fates/',
+    priceLabel: '$19.99 · Free Demo on Steam',
+    summary:
+      'Build a 3D fantasy kingdom driven by mortal memories and prestige. Optimize food rations, prestige furniture crafting chains, and castle defense gear.',
+    art: {
+      header: '/images/games/noble-fates/header.jpg',
+      hero: '/images/games/noble-fates/hero.jpg',
+      mapBg: '/images/games/noble-fates/map-bg.jpg',
+    },
+    affiliateLinks: { steamKeyUrl: '' },
+    items: [
+      {
+        id: 'timber-log',
+        icon: '🪵',
+        name: 'Seasoned Timber',
+        category: 'Material',
+        rarity: 'Common',
+        baseValue: 6,
+        craftTimeSec: 2,
+        powerKw: 0,
+        biomeOrSource: 'Forester Camp',
+      },
+      {
+        id: 'stone-block',
+        icon: '🧱',
+        name: 'Cut Limestone Block',
+        category: 'Material',
+        rarity: 'Common',
+        baseValue: 9,
+        craftTimeSec: 3,
+        powerKw: 0,
+        biomeOrSource: 'Stonecutter Bench',
+      },
+      {
+        id: 'fine-plank',
+        icon: '🪚',
+        name: 'Planed Hardwood Board',
+        category: 'Refined',
+        rarity: 'Uncommon',
+        baseValue: 22,
+        craftTimeSec: 4,
+        powerKw: 0,
+        biomeOrSource: 'Carpentry Table',
+        recipe: [{ itemId: 'timber-log', qty: 2 }],
+      },
+      {
+        id: 'noble-feast-table',
+        icon: '👑',
+        name: 'Noble Banquet Hall Set',
+        category: 'Prestige Furniture',
+        rarity: 'Rare',
+        baseValue: 140,
+        craftTimeSec: 9,
+        powerKw: 0,
+        biomeOrSource: 'Artisan Workshop',
+        recipe: [
+          { itemId: 'fine-plank', qty: 3 },
+          { itemId: 'stone-block', qty: 2 },
+        ],
+      },
+    ],
+    mapPins: [
+      { id: 'nf-pin-1', title: ' fertile Riverland Keep Site', category: 'Shrine / Upgrade', xPercent: 46, yPercent: 52, note: 'Balanced farming & natural moat chokepoint.' },
+      { id: 'nf-pin-2', title: 'Ancient Oak Grove', category: 'Resource', xPercent: 24, yPercent: 40, note: 'High-density timber & foraging berries.' },
+      { id: 'nf-pin-3', title: 'Highland Iron & Stone Ridge', category: 'Resource', xPercent: 72, yPercent: 34, note: 'Quarry stone and ore seam.' },
+      { id: 'nf-pin-4', title: 'Raider Warcamp Approach', category: 'Boss', xPercent: 78, yPercent: 74, note: 'Primary siege spawn direction—fortify walls.' },
+    ],
+    tradeValues: [
+      { name: 'Masterwork Runeblade', icon: '⚔️', score: 880, demand: 9, rarity: 'Legendary', trend: 'Rising' },
+      { name: 'Royal Tapestry Bundle', icon: '👑', score: 310, demand: 7, rarity: 'Rare', trend: 'Stable' },
     ],
   },
 ];

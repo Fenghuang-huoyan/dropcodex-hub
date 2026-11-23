@@ -1,51 +1,151 @@
 ---
 import HubLayout from '../layouts/HubLayout.astro';
+import Icon from '../components/Icon.astro';
 import { hubConfig } from '../config/hub.config.mjs';
 import { gamesRegistry } from '../data/games';
+
+const totalItems = gamesRegistry.reduce((acc, g) => acc + g.items.length, 0);
+const totalPins = gamesRegistry.reduce((acc, g) => acc + g.mapPins.length, 0);
 ---
 <HubLayout
-  title={`${hubConfig.brandName} — Game Calculators, Interactive Maps & Crafting Databases`}
+  title={`${hubConfig.brandName} — Gaming Calculators, Interactive Maps & Item Databases`}
   description={hubConfig.tagline}
 >
-  <section class="hero">
-    <span class="eyebrow">Single-Domain Game Tool Engine</span>
-    <h1>{hubConfig.brandName}: Precision Calculators, Interactive Maps &amp; Databases</h1>
-    <p class="subtitle">
-      Built for min-maxers: multi-stage crafting &amp; factory ratio calculators, interactive completion maps with local browser save tracking, and WFL trade checkers.
-    </p>
-    <div style="margin-top: 1rem; max-width: 460px;">
-      <input
-        id="hub-search"
-        class="input"
-        type="search"
-        placeholder="Search game calculators, maps, or genres..."
-        aria-label="Search games"
-      />
+  <!-- Spotlight Visual Hero -->
+  <section class="portal-hero">
+    <img
+      class="portal-hero-bg"
+      src="/images/games/main-sequence/hero.jpg"
+      alt="Featured space factory gameplay backdrop"
+      width="1280"
+      height="720"
+      fetchpriority="high"
+      decoding="async"
+    />
+    <div class="portal-hero-overlay"></div>
+    <div class="portal-hero-content">
+      <span class="eyebrow">
+        <Icon name="bolt" size={13} />
+        <span>Precision Gaming Tools &amp; Databases</span>
+      </span>
+      <h1>Min-Max Every Run, Factory &amp; Extraction</h1>
+      <p class="subtitle">
+        Multi-stage crafting &amp; smelter ratio calculators, tactical completion maps with local browser save tracking, and structured item databases for PC &amp; indie releases.
+      </p>
+
+      <div class="search-wrap">
+        <Icon name="search" size={17} />
+        <input
+          id="hub-search"
+          class="input"
+          type="search"
+          placeholder="Search games, ratio calculators, maps, or genres..."
+          aria-label="Search games and tools"
+        />
+      </div>
+
+      <div class="stat-strip">
+        <div class="stat-pill">
+          <strong>{gamesRegistry.length} Active Hubs</strong>
+          <span>Nov 2026 Releases</span>
+        </div>
+        <div class="stat-pill">
+          <strong>12 Interactive Tools</strong>
+          <span>Planners &amp; Maps</span>
+        </div>
+        <div class="stat-pill">
+          <strong>{totalItems + totalPins}+ Data Nodes</strong>
+          <span>Recipes &amp; Coordinates</span>
+        </div>
+        <div class="stat-pill">
+          <strong>Instant Browser Save</strong>
+          <span>Zero Account Wall</span>
+        </div>
+      </div>
     </div>
   </section>
 
-  <section aria-label="Supported Games">
-    <h2>Active Game Tool Modules</h2>
+  <!-- Featured Game Poster Grid (Maxroll / Prydwen Style) -->
+  <section aria-label="Featured Game Hubs">
+    <div style="display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:0.5rem;">
+      <h2 style="margin:0;">Featured Game Tool Hubs</h2>
+      <span style="font-size:0.82rem; color:var(--muted);">Direct tool access — pick a module to jump straight in</span>
+    </div>
+
     <div class="grid-cards" id="hub-game-grid">
       {gamesRegistry.map((game) => (
-        <article class="card" data-search={`${game.title} ${game.genre} ${game.engine}`.toLowerCase()}>
-          <span class="badge">{game.genre}</span>
-          <h3 style="margin: 0.55rem 0 0.35rem;">
-            <a href={`/${game.slug}/`} style="color: var(--text);">{game.title}</a>
-          </h3>
-          <p style="margin: 0 0 0.65rem; font-size: 0.85rem; color: var(--muted);">
-            {game.summary}
-          </p>
-          <p style="margin: 0 0 0.85rem; font-size: 0.76rem; color: var(--accent);">
-            Status: {game.dataStatus}
-          </p>
-          <div style="display:flex; flex-wrap:wrap; gap:0.45rem;">
-            <a class="btn" href={`/${game.slug}/calculator/`}>Calculator</a>
-            <a class="btn btn-outline" href={`/${game.slug}/map/`}>Map</a>
-            <a class="btn btn-outline" href={`/${game.slug}/database/`}>Database</a>
+        <article class="game-poster-card" data-search={`${game.title} ${game.genre} ${game.engine}`.toLowerCase()}>
+          <a href={`/${game.slug}/`} class="poster-media">
+            <img
+              src={game.art.header}
+              alt={`${game.title} cover art`}
+              width="460"
+              height="215"
+              loading="lazy"
+              decoding="async"
+            />
+            <span class="poster-badge">{game.statusBadge}</span>
+          </a>
+          <div class="poster-body">
+            <span class="poster-genre">{game.genre}</span>
+            <h3 class="poster-title">
+              <a href={`/${game.slug}/`}>{game.title}</a>
+            </h3>
+            <p class="poster-desc">{game.summary}</p>
+            <div class="quick-tool-list">
+              <a class="quick-tool-row" href={`/${game.slug}/calculator/`}>
+                <span class="quick-tool-left">
+                  <Icon name="calc" size={15} />
+                  <span>Crafting &amp; Ratio Calculator</span>
+                </span>
+                <span class="quick-tool-meta">Planner →</span>
+              </a>
+              <a class="quick-tool-row" href={`/${game.slug}/map/`}>
+                <span class="quick-tool-left">
+                  <Icon name="map" size={15} />
+                  <span>Interactive Tactical Map</span>
+                </span>
+                <span class="quick-tool-meta">{game.mapPins.length} Nodes →</span>
+              </a>
+              <a class="quick-tool-row" href={`/${game.slug}/database/`}>
+                <span class="quick-tool-left">
+                  <Icon name="db" size={15} />
+                  <span>Item &amp; Recipe Database</span>
+                </span>
+                <span class="quick-tool-meta">{game.items.length} Items →</span>
+              </a>
+            </div>
           </div>
         </article>
       ))}
+    </div>
+  </section>
+
+  <!-- Direct Tool Launchpad -->
+  <section aria-label="Popular Tools">
+    <h2>Most Used Calculators &amp; Trackers</h2>
+    <div class="grid-cards">
+      <a class="card" href="/main-sequence/calculator/" style="text-decoration:none; color:inherit;">
+        <span class="badge rarity-Rare">Factory Throughput</span>
+        <h3 style="margin:0.55rem 0 0.35rem; color:#fff;">Main Sequence Smelter &amp; kW Ratio Planner</h3>
+        <p style="margin:0; font-size:0.85rem; color:var(--muted);">
+          Break down hull plating, conduits, and thruster manifolds into exact machine counts per minute and kW load.
+        </p>
+      </a>
+      <a class="card" href="/below-the-stone/map/" style="text-decoration:none; color:inherit;">
+        <span class="badge rarity-Legendary">Extraction Map</span>
+        <h3 style="margin:0.55rem 0 0.35rem; color:#fff;">Below the Stone 1.0 Layer &amp; Biome Tracker</h3>
+        <p style="margin:0; font-size:0.85rem; color:var(--muted);">
+          Track drill pod extraction points, fungal ore veins, and guardian arenas with browser completion sync.
+        </p>
+      </a>
+      <a class="card" href="/noble-fates/calculator/" style="text-decoration:none; color:inherit;">
+        <span class="badge rarity-Epic">Colony Economy</span>
+        <h3 style="margin:0.55rem 0 0.35rem; color:#fff;">Noble Fates 1.0 Prestige Crafting Calculator</h3>
+        <p style="margin:0; font-size:0.85rem; color:var(--muted);">
+          Optimize timber-to-hardwood plank chains and noble banquet furniture throughput for high-prestige halls.
+        </p>
+      </a>
     </div>
   </section>
 

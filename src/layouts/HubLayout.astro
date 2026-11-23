@@ -6,9 +6,11 @@ import { monetizationConfig } from '../config/monetization';
 interface Props {
   title: string;
   description: string;
+  ogImage?: string;
 }
-const { title, description } = Astro.props;
+const { title, description, ogImage = '/images/games/main-sequence/header.jpg' } = Astro.props;
 const canonical = new URL(Astro.url.pathname, hubConfig.siteUrl).href;
+const ogImageUrl = new URL(ogImage, hubConfig.siteUrl).href;
 const gaId = hubConfig.gaMeasurementId.trim();
 const adsenseClient = monetizationConfig.ads.adsense.enabled
   ? monetizationConfig.ads.adsense.publisherClient.trim()
@@ -28,6 +30,9 @@ const adsenseClient = monetizationConfig.ads.adsense.enabled
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:site_name" content={hubConfig.brandName} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={ogImageUrl} />
     {gaId && (
       <>
         <script async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}></script>
@@ -51,15 +56,16 @@ const adsenseClient = monetizationConfig.ads.adsense.enabled
     <header class="site-header">
       <div class="container header-inner">
         <a class="brand" href="/">
-          <span class="brand-dot"></span>
+          <span class="brand-mark">DC</span>
           <span>{hubConfig.brandName}</span>
         </a>
         <nav class="nav-links" aria-label="Primary">
-          <a href="/">All Games</a>
-          <a href="/main-sequence/calculator/">Main Sequence Calc</a>
+          <a href="/">Game Hubs</a>
+          <a href="/main-sequence/calculator/">Main Sequence</a>
           <a href="/below-the-stone/calculator/">Below the Stone 1.0</a>
+          <a href="/noble-fates/calculator/">Noble Fates 1.0</a>
           <a href="/about/">About</a>
-          <a href="/contact/">Contact</a>
+          <a href="/contact/">Support</a>
         </nav>
       </div>
     </header>
@@ -71,15 +77,16 @@ const adsenseClient = monetizationConfig.ads.adsense.enabled
     <footer class="site-footer">
       <div class="container">
         <div class="footer-links">
-          <a href="/">Home</a>
-          <a href="/about/">About &amp; Data Method</a>
+          <a href="/">Game Hubs</a>
+          <a href="/about/">Editorial &amp; Data Method</a>
           <a href="/privacy/">Privacy Policy</a>
           <a href="/terms/">Terms of Service</a>
-          <a href="/contact/">Contact</a>
+          <a href="/contact/">Support &amp; Corrections</a>
+          <a href="/images/games/ATTRIBUTION.txt">Image Attribution</a>
         </div>
         <p>
-          {hubConfig.brandName} ({hubConfig.domain}) is an independent, unofficial fan-built gaming tool &amp; database hub.
-          All game titles, assets, and trademarks belong to their respective developers and publishers.
+          {hubConfig.brandName} ({hubConfig.domain}) is an independent, fan-built gaming calculator, map, and database portal.
+          Not affiliated with or endorsed by Valve, Tumbling Dumpling Studio, Strollart, Apogee Entertainment, or Xobermon. Game promotional artwork belongs to its respective copyright owners.
         </p>
       </div>
     </footer>

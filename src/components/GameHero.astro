@@ -1,0 +1,35 @@
+---
+import type { GameModule } from '../data/games';
+import GameNav from './GameNav.astro';
+
+interface Props {
+  game: GameModule;
+  active: 'overview' | 'calculator' | 'map' | 'database' | 'values';
+  heading: string;
+  subtitle: string;
+}
+const { game, active, heading, subtitle } = Astro.props;
+---
+<section class="game-banner">
+  <img class="game-banner-bg" src={game.art.hero} alt="" width="1280" height="720" decoding="async" />
+  <div class="game-banner-overlay"></div>
+  <div class="game-banner-inner">
+    <div class="game-banner-top">
+      <img
+        class="game-capsule"
+        src={game.art.header}
+        alt={`${game.title} official cover art`}
+        width="460"
+        height="215"
+        fetchpriority="high"
+        decoding="async"
+      />
+      <div style="min-width: 0; flex: 1;">
+        <span class="eyebrow">{game.statusBadge} · {game.releaseLabel}</span>
+        <h1>{heading}</h1>
+        <p class="subtitle">{subtitle}</p>
+      </div>
+    </div>
+    <GameNav game={game} active={active} />
+  </div>
+</section>

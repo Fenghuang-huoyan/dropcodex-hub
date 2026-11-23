@@ -1,5 +1,6 @@
 ---
 import type { GameModule } from '../data/games';
+import Icon from './Icon.astro';
 
 interface Props {
   game: GameModule;
@@ -8,9 +9,24 @@ interface Props {
 const { game, active } = Astro.props;
 ---
 <nav class="tool-tabs" aria-label={`${game.title} tools`}>
-  <a class:list={['tool-tab', active === 'overview' && 'active']} href={`/${game.slug}/`}>Overview</a>
-  <a class:list={['tool-tab', active === 'calculator' && 'active']} href={`/${game.slug}/calculator/`}>Crafting &amp; Yield Calculator</a>
-  <a class:list={['tool-tab', active === 'map' && 'active']} href={`/${game.slug}/map/`}>Interactive Map &amp; Save Check</a>
-  <a class:list={['tool-tab', active === 'database' && 'active']} href={`/${game.slug}/database/`}>Item Database</a>
-  <a class:list={['tool-tab', active === 'values' && 'active']} href={`/${game.slug}/values/`}>Trade / WFL Values</a>
+  <a class:list={['tool-tab', active === 'overview' && 'active']} href={`/${game.slug}/`}>
+    <Icon name="grid" size={15} />
+    <span>Hub Overview</span>
+  </a>
+  <a class:list={['tool-tab', active === 'calculator' && 'active']} href={`/${game.slug}/calculator/`}>
+    <Icon name="calc" size={15} />
+    <span>Ratio Calculator</span>
+  </a>
+  <a class:list={['tool-tab', active === 'map' && 'active']} href={`/${game.slug}/map/`}>
+    <Icon name="map" size={15} />
+    <span>Interactive Map</span>
+  </a>
+  <a class:list={['tool-tab', active === 'database' && 'active']} href={`/${game.slug}/database/`}>
+    <Icon name="db" size={15} />
+    <span>Item Database</span>
+  </a>
+  <a class:list={['tool-tab', active === 'values' && 'active']} href={`/${game.slug}/values/`}>
+    <Icon name="coins" size={15} />
+    <span>Economy &amp; Values</span>
+  </a>
 </nav>

@@ -1,6 +1,6 @@
 ---
 import HubLayout from '../../layouts/HubLayout.astro';
-import GameNav from '../../components/GameNav.astro';
+import GameHero from '../../components/GameHero.astro';
 import MonetizationBar from '../../components/MonetizationBar.astro';
 import { gamesRegistry, type GameModule } from '../../data/games';
 import { hubConfig } from '../../config/hub.config.mjs';
@@ -22,58 +22,62 @@ const serializedItems = JSON.stringify(game.items);
 <HubLayout
   title={`${game.title} Crafting, Production Ratio & Profit Calculator — ${hubConfig.brandName}`}
   description={`Calculate exact raw resource requirements, smelter ratios, power load, and profit margin for ${game.title}.`}
+  ogImage={game.art.header}
 >
-  <section class="hero">
-    <span class="eyebrow">Multi-Stage Crafting &amp; Throughput Engine</span>
-    <h1>{game.title} Crafting &amp; Ratio Calculator</h1>
-    <p class="subtitle">
-      Select any craftable item and target output per minute to recursively break down raw materials, machine counts, power draw, and value margin.
-    </p>
-    <GameNav game={game} active="calculator" />
-  </section>
+  <GameHero
+    game={game}
+    active="calculator"
+    heading={`${game.title} Crafting & Ratio Calculator`}
+    subtitle="Select any craftable target and desired output per minute to recursively break down raw materials, machine counts, kW power load, and net value added."
+  />
 
   <MonetizationBar game={game} />
 
   <section class="card" aria-label="Production Ratio Calculator">
-    <div class="grid-cards" style="margin-top:0;">
+    <div class="grid-cards" style="margin-top:0; margin-bottom:1.1rem;">
       <label>
-        <span style="display:block; font-size:0.82rem; font-weight:700; margin-bottom:0.3rem;">Target Output Item</span>
+        <span style="display:block; font-size:0.82rem; font-weight:700; margin-bottom:0.35rem; color:#cbd5e1;">Target Output Item</span>
         <select id="calc-target-item" class="input">
           {(craftableItems.length > 0 ? craftableItems : game.items).map((it) => (
-            <option value={it.id}>{it.name} (Value: {it.baseValue})</option>
+            <option value={it.id}>{it.name} ({it.rarity} · Base Value {it.baseValue})</option>
           ))}
         </select>
       </label>
       <label>
-        <span style="display:block; font-size:0.82rem; font-weight:700; margin-bottom:0.3rem;">Target Units / Minute</span>
+        <span style="display:block; font-size:0.82rem; font-weight:700; margin-bottom:0.35rem; color:#cbd5e1;">Target Units / Minute</span>
         <input id="calc-rate" class="input" type="number" min="1" max="10000" step="1" value="30" />
       </label>
     </div>
 
-    <div class="grid-cards" id="calc-summary">
-      <div class="card" style="background:var(--bg);">
-        <span style="font-size:0.76rem; color:var(--muted);">Gross Output Value / Min</span>
-        <strong id="out-gross" style="display:block; font-size:1.25rem; color:var(--emerald);">—</strong>
+    <div class="stat-strip" style="margin-top:0; margin-bottom:1.4rem;">
+      <div class="stat-pill">
+        <span>Gross Output Value / Min</span>
+        <strong id="out-gross" style="color:var(--emerald); font-size:1.25rem;">—</strong>
       </div>
-      <div class="card" style="background:var(--bg);">
-        <span style="font-size:0.76rem; color:var(--muted);">Raw Material Cost / Min</span>
-        <strong id="out-cost" style="display:block; font-size:1.25rem;">—</strong>
+      <div class="stat-pill">
+        <span>Raw Feedstock Cost / Min</span>
+        <strong id="out-cost" style="font-size:1.25rem;">—</strong>
       </div>
-      <div class="card" style="background:var(--bg);">
-        <span style="font-size:0.76rem; color:var(--muted);">Net Value Added &amp; Power</span>
-        <strong id="out-net" style="display:block; font-size:1.25rem; color:var(--accent);">—</strong>
+      <div class="stat-pill">
+        <span>Net Value Margin / Min</span>
+        <strong id="out-net" style="color:var(--accent-hover); font-size:1.25rem;">—</strong>
+      </div>
+      <div class="stat-pill">
+        <span>Estimated Facility Load</span>
+        <strong id="out-power" style="color:var(--sky); font-size:1.25rem;">—</strong>
       </div>
     </div>
 
-    <h2 style="margin-top:1rem;">Recursive Bill of Materials &amp; Machine Count</h2>
+    <h2 style="margin-top:0.5rem;">Recursive Bill of Materials &amp; Facility Count</h2>
     <div class="table-scroll">
       <table>
         <thead>
           <tr>
             <th>Material / Stage</th>
+            <th>Rarity</th>
             <th>Required / Min</th>
-            <th>Machines Needed</th>
-            <th>Source / Facility</th>
+            <th>Facilities Needed</th>
+            <th>Source / Station</th>
           </tr>
         </thead>
         <tbody id="calc-bom-rows"></tbody>
@@ -90,6 +94,7 @@ const serializedItems = JSON.stringify(game.items);
     const grossEl = document.getElementById('out-gross');
     const costEl = document.getElementById('out-cost');
     const netEl = document.getElementById('out-net');
+    const powerEl = document.getElementById('out-power');
 
     function compute() {
       const targetId = targetSel.value;
@@ -99,6 +104,7 @@ const serializedItems = JSON.stringify(game.items);
 
       const totals = new Map();
       let totalPowerKw = 0;
+      let totalMachines = 0;
       let rawCost = 0;
 
       function walk(id, neededPerMin) {
@@ -106,8 +112,8 @@ const serializedItems = JSON.stringify(game.items);
         if (!node) return;
         totals.set(id, (totals.get(id) || 0) + neededPerMin);
         const craftSec = node.craftTimeSec || 4;
-        const perMachinePerMin = 60 / craftSec;
-        const machines = neededPerMin / perMachinePerMin;
+        const machines = neededPerMin / (60 / craftSec);
+        totalMachines += machines;
         totalPowerKw += machines * (node.powerKw || 0);
 
         if (node.recipe && node.recipe.length > 0) {
@@ -121,19 +127,24 @@ const serializedItems = JSON.stringify(game.items);
       const gross = ratePerMin * (rootItem.baseValue || 0);
       const net = gross - rawCost;
 
-      grossEl.textContent = gross.toLocaleString('en-US') + ' pts/min';
-      costEl.textContent = rawCost.toLocaleString('en-US') + ' pts/min';
-      netEl.textContent = '+' + net.toLocaleString('en-US') + ' (' + Math.ceil(totalPowerKw) + ' kW)';
+      grossEl.textContent = gross.toLocaleString('en-US') + ' pts';
+      costEl.textContent = rawCost.toLocaleString('en-US') + ' pts';
+      netEl.textContent = '+' + net.toLocaleString('en-US') + ' pts';
+      powerEl.textContent = totalPowerKw > 0
+        ? Math.ceil(totalPowerKw) + ' kW · ' + totalMachines.toFixed(1) + ' units'
+        : totalMachines.toFixed(1) + ' stations';
 
       bomBody.innerHTML = '';
       totals.forEach((reqRate, id) => {
         const node = itemMap.get(id);
         const craftSec = node.craftTimeSec || 4;
         const machines = (reqRate / (60 / craftSec)).toFixed(1);
+        const code = node.name.split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
         const tr = document.createElement('tr');
         tr.innerHTML =
-          '<td><strong>' + node.name + '</strong></td>' +
-          '<td>' + reqRate.toFixed(1) + ' / min</td>' +
+          '<td><span class="item-cell"><span class="item-glyph rarity-' + node.rarity + '">' + code + '</span><strong>' + node.name + '</strong></span></td>' +
+          '<td><span class="badge rarity-' + node.rarity + '">' + node.rarity + '</span></td>' +
+          '<td><strong>' + reqRate.toFixed(1) + '</strong> / min</td>' +
           '<td>' + machines + 'x</td>' +
           '<td>' + node.biomeOrSource + '</td>';
         bomBody.appendChild(tr);

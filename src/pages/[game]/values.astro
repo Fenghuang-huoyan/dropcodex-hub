@@ -1,6 +1,6 @@
 ---
 import HubLayout from '../../layouts/HubLayout.astro';
-import GameNav from '../../components/GameNav.astro';
+import GameHero from '../../components/GameHero.astro';
 import MonetizationBar from '../../components/MonetizationBar.astro';
 import { gamesRegistry, type GameModule } from '../../data/games';
 import { hubConfig } from '../../config/hub.config.mjs';
@@ -19,56 +19,65 @@ const { game } = Astro.props;
 const hasTrades = game.tradeValues.length > 0;
 ---
 <HubLayout
-  title={`${game.title} Value List & WFL Trade Calculator — ${hubConfig.brandName}`}
-  description={`Trading value reference and Win/Fair/Lose (WFL) calculator module for ${game.title}.`}
+  title={`${game.title} Value List & Economy Reference — ${hubConfig.brandName}`}
+  description={`Item value index, demand ratings, and crafting profit margins for ${game.title}.`}
+  ogImage={game.art.header}
 >
-  <section class="hero">
-    <span class="eyebrow">Economy &amp; WFL Value Module</span>
-    <h1>{game.title} Economy &amp; Trade Values</h1>
-    <p class="subtitle">
-      {hasTrades
-        ? 'Compare item scores, demand ratings, and Win/Fair/Lose trade balance.'
-        : `${game.title} is primarily a solo/co-op progression game without a player auction market. Use the Crafting Calculator for item value margins.`}
-    </p>
-    <GameNav game={game} active="values" />
-  </section>
+  <GameHero
+    game={game}
+    active="values"
+    heading={`${game.title} Economy & Value Index`}
+    subtitle={
+      hasTrades
+        ? 'Compare high-tier item value scores, demand ratings, and market trends.'
+        : `${game.title} focuses on solo/co-op factory & progression loops. Use the Ratio Calculator to maximize value output per minute.`
+    }
+  />
 
   <MonetizationBar game={game} />
 
   {hasTrades ? (
     <section class="card">
-      <h2 style="margin-top:0;">Indexed Value Reference</h2>
+      <h2 style="margin-top:0;">High-Tier Value Reference</h2>
       <div class="table-scroll">
         <table>
           <thead>
             <tr>
               <th>Item</th>
-              <th>Score</th>
+              <th>Value Score</th>
               <th>Demand</th>
               <th>Rarity</th>
               <th>Trend</th>
             </tr>
           </thead>
           <tbody>
-            {game.tradeValues.map((tv) => (
-              <tr>
-                <td><strong>{tv.name}</strong></td>
-                <td>{tv.score.toLocaleString('en-US')}</td>
-                <td>{tv.demand}/10</td>
-                <td><span class="badge">{tv.rarity}</span></td>
-                <td>{tv.trend}</td>
-              </tr>
-            ))}
+            {game.tradeValues.map((tv) => {
+              const code = tv.name.split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
+              return (
+                <tr>
+                  <td>
+                    <span class="item-cell">
+                      <span class={`item-glyph rarity-${tv.rarity}`}>{code}</span>
+                      <strong>{tv.name}</strong>
+                    </span>
+                  </td>
+                  <td><strong>{tv.score.toLocaleString('en-US')}</strong></td>
+                  <td>{tv.demand}/10</td>
+                  <td><span class={`badge rarity-${tv.rarity}`}>{tv.rarity}</span></td>
+                  <td>{tv.trend}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
     </section>
   ) : (
     <section class="card">
-      <p style="margin:0 0 0.75rem;">
-        Looking for raw-to-crafted profit margins in <strong>{game.title}</strong>? Jump straight to the recursive ratio engine:
+      <p style="margin:0 0 0.85rem;">
+        Want to find the highest-margin assembly line in <strong>{game.title}</strong>? Open the recursive throughput planner:
       </p>
-      <a class="btn" href={`/${game.slug}/calculator/`}>Open {game.title} Crafting Calculator →</a>
+      <a class="btn" href={`/${game.slug}/calculator/`}>Launch {game.title} Ratio Calculator →</a>
     </section>
   )}
 </HubLayout>
