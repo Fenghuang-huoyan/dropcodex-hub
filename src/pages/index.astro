@@ -45,7 +45,7 @@ const totalPins = gamesRegistry.reduce((s, g) => s + g.mapPins.length, 0);
       <span class="ticker-pulse"></span>
       <strong>LIVE WORKBENCH:</strong>
       <span style="color:var(--text-dim); margin-left:0.35rem;">
-        Below the Stone v1.0 Layer-3 Forge · Main Sequence EA Orbital Ratios · Noble Fates v1.0 Colony Chains
+        GTA VI Leonida Safe Codes &amp; Fences · Main Sequence EA Orbital Ratios · Below the Stone v1.0 Forge
       </span>
     </div>
     <div style="color:var(--text-dim); font-family:monospace; font-size:0.75rem;">
@@ -90,7 +90,7 @@ const totalPins = gamesRegistry.reduce((s, g) => s + g.mapPins.length, 0);
     </div>
 
     <div class="bento-side">
-      {otherGames.map((g) => (
+      {otherGames.slice(0, 3).map((g) => (
         <div class="bento-tile">
           <img class="bento-tile-img" src={g.art.header} alt={g.title} width="460" height="215" loading="lazy" />
           <div class="bento-tile-shade"></div>
@@ -105,16 +105,6 @@ const totalPins = gamesRegistry.reduce((s, g) => s + g.mapPins.length, 0);
           </div>
         </div>
       ))}
-
-      <a class="bento-tile" href="/below-the-stone/map/" style="background:linear-gradient(145deg, #131c2b 0%, #0b101b 100%);">
-        <div class="bento-tile-content">
-          <span class="badge rarity-Uncommon" style="margin-bottom:0.35rem;">SAVE SYNC READY</span>
-          <strong style="display:block; font-size:0.98rem; margin-bottom:0.25rem;">Interactive Completion Maps</strong>
-          <span style="font-size:0.78rem; color:var(--text-dim);">
-            Filter extraction pods, ore veins &amp; boss lairs. Saves locally or imports <code>.json</code> progress.
-          </span>
-        </div>
-      </a>
 
       <a class="bento-tile" href="/main-sequence/calculator/?item=fusion-regulator" style="background:linear-gradient(145deg, #1a1628 0%, #0b101b 100%);">
         <div class="bento-tile-content">
@@ -217,6 +207,11 @@ const totalPins = gamesRegistry.reduce((s, g) => s + g.mapPins.length, 0);
           </h2>
         </div>
         <ul class="changelog-list">
+          <li>
+            <div class="changelog-date">2026-11-24 · CONSOLE LAUNCH</div>
+            <strong style="display:block; margin:0.15rem 0;">GTA VI Leonida Safe Codes &amp; Fence DB</strong>
+            <span style="color:var(--text-dim);">Indexed 19 verified fixed safe/door codes, Yasmani &amp; Moses laundering chains, and Ch.4 vault payouts.</span>
+          </li>
           <li>
             <div class="changelog-date">2026-11-23 · v1.0.2 INDEX</div>
             <strong style="display:block; margin:0.15rem 0;">Below the Stone 1.0 Smelting Tree</strong>

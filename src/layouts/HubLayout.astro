@@ -49,6 +49,14 @@ const omniIndex = [
       href: `/${g.slug}/map/`,
     }))
   ),
+  ...gamesRegistry.flatMap((g) =>
+    (g.quickCodes || []).map((qc) => ({
+      label: `${qc.target} → ${qc.codeOrCombo}`,
+      sub: `${g.title} · ${qc.regionOrUnlock}`,
+      badge: qc.type.toUpperCase(),
+      href: `/${g.slug}/database/`,
+    }))
+  ),
 ];
 const omniJson = JSON.stringify(omniIndex);
 ---

@@ -31,6 +31,49 @@ const { game } = Astro.props;
 
   <MonetizationBar game={game} />
 
+  {game.quickCodes && game.quickCodes.length > 0 && (
+    <section class="card" style="margin-bottom:1.25rem;">
+      <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:0.75rem; margin-bottom:0.85rem;">
+        <div>
+          <span class="badge rarity-Legendary" style="margin-bottom:0.25rem;">INSTANT CODE LOOKUP ({game.quickCodes.length})</span>
+          <h2 style="margin:0; font-size:1.1rem;">Verified Safe Combinations, Door Keypads &amp; Controller Inputs</h2>
+        </div>
+        <input
+          id="code-filter"
+          class="input"
+          type="search"
+          placeholder="Filter location, gang, or digits (e.g. Kingpin, 0300, $250,000)..."
+          aria-label="Filter safe codes and cheats"
+          style="max-width:360px;"
+        />
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Location / Effect</th>
+              <th>Type</th>
+              <th>Code / D-Pad Combo</th>
+              <th>Region / Unlock Requirement</th>
+              <th>Field Note</th>
+            </tr>
+          </thead>
+          <tbody id="code-tbody">
+            {game.quickCodes.map((qc) => (
+              <tr data-codehay={`${qc.target} ${qc.type} ${qc.codeOrCombo} ${qc.regionOrUnlock} ${qc.note}`.toLowerCase()}>
+                <td><strong>{qc.target}</strong></td>
+                <td><span class="badge rarity-Rare">{qc.type}</span></td>
+                <td><code style="color:var(--emerald); font-weight:700; font-size:0.9rem;">{qc.codeOrCombo}</code></td>
+                <td>{qc.regionOrUnlock}</td>
+                <td style="color:var(--muted); font-size:0.82rem;">{qc.note}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  )}
+
   <section class="card">
     <div style="margin-bottom:1rem; max-width:440px;">
       <input id="db-filter" class="input" type="search" placeholder="Search item name, rarity, or crafting station..." aria-label="Filter items" />
@@ -81,6 +124,16 @@ const { game } = Astro.props;
         const q = input.value.trim().toLowerCase();
         rows.forEach((r) => {
           r.style.display = !q || (r.getAttribute('data-hay') || '').includes(q) ? '' : 'none';
+        });
+      });
+    }
+    const codeInput = document.getElementById('code-filter');
+    const codeRows = Array.from(document.querySelectorAll('#code-tbody tr'));
+    if (codeInput) {
+      codeInput.addEventListener('input', () => {
+        const q = codeInput.value.trim().toLowerCase();
+        codeRows.forEach((r) => {
+          r.style.display = !q || (r.getAttribute('data-codehay') || '').includes(q) ? '' : 'none';
         });
       });
     }
