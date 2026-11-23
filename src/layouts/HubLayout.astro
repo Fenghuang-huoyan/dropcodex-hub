@@ -1,7 +1,9 @@
 ---
 import '../styles/global.css';
+import Icon from '../components/Icon.astro';
 import { hubConfig } from '../config/hub.config.mjs';
 import { monetizationConfig } from '../config/monetization';
+import { gamesRegistry } from '../data/games';
 
 interface Props {
   title: string;
@@ -9,12 +11,46 @@ interface Props {
   ogImage?: string;
 }
 const { title, description, ogImage = '/images/games/main-sequence/header.jpg' } = Astro.props;
-const canonical = new URL(Astro.url.pathname, hubConfig.siteUrl).href;
+const pathname = Astro.url.pathname;
+const canonical = new URL(pathname, hubConfig.siteUrl).href;
 const ogImageUrl = new URL(ogImage, hubConfig.siteUrl).href;
 const gaId = hubConfig.gaMeasurementId.trim();
 const adsenseClient = monetizationConfig.ads.adsense.enabled
   ? monetizationConfig.ads.adsense.publisherClient.trim()
   : '';
+
+// Build global omnibox search index across all games, items & map pins
+const omniIndex = [
+  ...gamesRegistry.map((g) => ({
+    label: `${g.title} — Ratio Calculator`,
+    sub: g.genre,
+    badge: 'TOOL',
+    href: `/${g.slug}/calculator/`,
+  })),
+  ...gamesRegistry.map((g) => ({
+    label: `${g.title} — Interactive Map`,
+    sub: `${g.mapPins.length} tactical nodes`,
+    badge: 'MAP',
+    href: `/${g.slug}/map/`,
+  })),
+  ...gamesRegistry.flatMap((g) =>
+    g.items.map((it) => ({
+      label: it.name,
+      sub: `${g.title} · ${it.biomeOrSource} (Val ${it.baseValue})`,
+      badge: it.rarity.toUpperCase(),
+      href: it.recipe ? `/${g.slug}/calculator/?item=${it.id}` : `/${g.slug}/database/`,
+    }))
+  ),
+  ...gamesRegistry.flatMap((g) =>
+    g.mapPins.map((p) => ({
+      label: p.title,
+      sub: `${g.title} Map · (${p.xPercent}, ${p.yPercent})`,
+      badge: p.category.toUpperCase(),
+      href: `/${g.slug}/map/`,
+    }))
+  ),
+];
+const omniJson = JSON.stringify(omniIndex);
 ---
 <!doctype html>
 <html lang="en">
@@ -53,42 +89,134 @@ const adsenseClient = monetizationConfig.ads.adsense.enabled
     )}
   </head>
   <body>
-    <header class="site-header">
-      <div class="container header-inner">
-        <a class="brand" href="/">
-          <span class="brand-mark">DC</span>
-          <span>{hubConfig.brandName}</span>
-        </a>
-        <nav class="nav-links" aria-label="Primary">
-          <a href="/">Game Hubs</a>
-          <a href="/main-sequence/calculator/">Main Sequence</a>
-          <a href="/below-the-stone/calculator/">Below the Stone 1.0</a>
-          <a href="/noble-fates/calculator/">Noble Fates 1.0</a>
-          <a href="/about/">About</a>
-          <a href="/contact/">Support</a>
-        </nav>
-      </div>
-    </header>
+    <!-- Maxroll-style Left Game Switcher Rail -->
+    <aside class="app-rail" aria-label="Game Switcher">
+      <a class="rail-logo" href="/" title={`${hubConfig.brandName} Home`}>DC</a>
+      <span class="rail-divider"></span>
+      <a class:list={['rail-item', pathname === '/' && 'active']} href="/" title="All Games & Live Database">
+        <Icon name="grid" size={18} />
+      </a>
+      {gamesRegistry.map((g) => {
+        const isCurrent = pathname.startsWith(`/${g.slug}/`);
+        return (
+          <a class:list={['rail-item', isCurrent && 'active']} href={`/${g.slug}/calculator/`} title={`${g.title} Tools`}>
+            <img src={g.art.header} alt={g.title} width="88" height="88" loading="lazy" />
+            <span class="rail-dot"></span>
+          </a>
+        );
+      })}
+    </aside>
 
-    <main class="container">
-      <slot />
-    </main>
+    <div class="app-shell">
+      <!-- Global Command Topbar with Instant Omnibox -->
+      <header class="app-topbar">
+        <div class="topbar-inner">
+          <a class="topbar-brand" href="/">
+            <span>{hubConfig.brandName}</span>
+            <span class="topbar-tag">DB &amp; Planners</span>
+          </a>
 
-    <footer class="site-footer">
-      <div class="container">
-        <div class="footer-links">
-          <a href="/">Game Hubs</a>
-          <a href="/about/">Editorial &amp; Data Method</a>
-          <a href="/privacy/">Privacy Policy</a>
-          <a href="/terms/">Terms of Service</a>
-          <a href="/contact/">Support &amp; Corrections</a>
-          <a href="/images/games/ATTRIBUTION.txt">Image Attribution</a>
+          <div class="omnibox">
+            <span class="omnibox-icon"><Icon name="search" size={15} /></span>
+            <input
+              id="global-omnibox"
+              class="omnibox-input"
+              type="search"
+              autocomplete="off"
+              placeholder="Jump to any item, recipe, map coordinate, or calculator..."
+              aria-label="Global database search"
+            />
+            <span class="omnibox-kbd">/</span>
+            <div id="global-omni-results" class="omnibox-dropdown" role="listbox"></div>
+          </div>
+
+          <nav class="topbar-nav" aria-label="Utility Navigation">
+            <a href="/main-sequence/calculator/">Calculators</a>
+            <a href="/below-the-stone/map/">Maps</a>
+            <a href="/about/">Method</a>
+            <a href="/contact/">Support</a>
+          </nav>
         </div>
-        <p>
-          {hubConfig.brandName} ({hubConfig.domain}) is an independent, fan-built gaming calculator, map, and database portal.
-          Not affiliated with or endorsed by Valve, Tumbling Dumpling Studio, Strollart, Apogee Entertainment, or Xobermon. Game promotional artwork belongs to its respective copyright owners.
-        </p>
-      </div>
-    </footer>
+      </header>
+
+      <main class="workspace-main">
+        <slot />
+      </main>
+
+      <footer class="site-footer">
+        <div class="footer-inner">
+          <div class="footer-links">
+            <a href="/">Database Index</a>
+            <a href="/about/">Data &amp; Verification</a>
+            <a href="/privacy/">Privacy Policy</a>
+            <a href="/terms/">Terms of Service</a>
+            <a href="/contact/">Support</a>
+            <a href="/images/games/ATTRIBUTION.txt">Asset Credits</a>
+          </div>
+          <div>
+            {hubConfig.brandName} ({hubConfig.domain}) is an independent gaming database &amp; calculator workbench. Not affiliated with Valve or any game studio. Trademarks belong to their respective owners.
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script is:inline define:vars={{ omniJson }}>
+      const entries = JSON.parse(omniJson);
+      const box = document.getElementById('global-omnibox');
+      const drop = document.getElementById('global-omni-results');
+
+      function renderOmni(q) {
+        if (!drop) return;
+        const term = q.trim().toLowerCase();
+        if (!term) {
+          drop.classList.remove('open');
+          drop.innerHTML = '';
+          return;
+        }
+        const hits = entries
+          .filter((e) => e.label.toLowerCase().includes(term) || e.sub.toLowerCase().includes(term))
+          .slice(0, 8);
+
+        if (hits.length === 0) {
+          drop.innerHTML = '<div class="omni-row"><span style="color:var(--text-muted)">No matching items or nodes</span></div>';
+        } else {
+          drop.innerHTML = hits
+            .map(
+              (h) =>
+                '<a class="omni-row" href="' +
+                h.href +
+                '"><span><strong style="display:block">' +
+                h.label +
+                '</strong><span style="font-size:0.74rem;color:var(--text-dim)">' +
+                h.sub +
+                '</span></span><span class="badge">' +
+                h.badge +
+                '</span></a>'
+            )
+            .join('');
+        }
+        drop.classList.add('open');
+      }
+
+      if (box) {
+        box.addEventListener('input', () => renderOmni(box.value));
+        box.addEventListener('focus', () => {
+          if (box.value.trim()) renderOmni(box.value);
+        });
+      }
+      document.addEventListener('click', (e) => {
+        if (drop && box && !box.contains(e.target) && !drop.contains(e.target)) {
+          drop.classList.remove('open');
+        }
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === '/' && document.activeElement !== box && !['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement?.tagName)) {
+          e.preventDefault();
+          box?.focus();
+        } else if (e.key === 'Escape') {
+          drop?.classList.remove('open');
+        }
+      });
+    </script>
   </body>
 </html>

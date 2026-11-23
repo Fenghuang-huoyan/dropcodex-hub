@@ -4,162 +4,274 @@ import Icon from '../components/Icon.astro';
 import { hubConfig } from '../config/hub.config.mjs';
 import { gamesRegistry } from '../data/games';
 
-const totalItems = gamesRegistry.reduce((acc, g) => acc + g.items.length, 0);
-const totalPins = gamesRegistry.reduce((acc, g) => acc + g.mapPins.length, 0);
+const [leadGame, ...otherGames] = gamesRegistry;
+
+// Flatten all items across games with recursive raw-ore crafting margin for SteamDB-style dense table
+const matrixRows = gamesRegistry.flatMap((g) => {
+  const map = new Map(g.items.map((i) => [i.id, i]));
+  function calcRawCost(item: typeof g.items[number]): number {
+    if (!item.recipe || item.recipe.length === 0) return item.baseValue;
+    return item.recipe.reduce((sum, ing) => {
+      const sub = map.get(ing.itemId);
+      return sum + (sub ? calcRawCost(sub) : 0) * ing.qty;
+    }, 0);
+  }
+  return g.items.map((it) => {
+    const isCraftable = Boolean(it.recipe && it.recipe.length > 0);
+    const margin = isCraftable ? it.baseValue - calcRawCost(it) : 0;
+    const code = it.name.split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
+    return {
+      gameSlug: g.slug,
+      gameTitle: g.title,
+      gameHeader: g.art.header,
+      item: it,
+      code,
+      margin,
+      isCraftable,
+    };
+  });
+});
+
+const totalItems = matrixRows.length;
+const totalPins = gamesRegistry.reduce((s, g) => s + g.mapPins.length, 0);
 ---
 <HubLayout
-  title={`${hubConfig.brandName} — Gaming Calculators, Interactive Maps & Item Databases`}
+  title={`${hubConfig.brandName} — Live Crafting Calculators, Tactical Maps & Item Database`}
   description={hubConfig.tagline}
 >
-  <!-- Spotlight Visual Hero -->
-  <section class="portal-hero">
-    <img
-      class="portal-hero-bg"
-      src="/images/games/main-sequence/hero.jpg"
-      alt="Featured space factory gameplay backdrop"
-      width="1280"
-      height="720"
-      fetchpriority="high"
-      decoding="async"
-    />
-    <div class="portal-hero-overlay"></div>
-    <div class="portal-hero-content">
-      <span class="eyebrow">
-        <Icon name="bolt" size={13} />
-        <span>Precision Gaming Tools &amp; Databases</span>
+  <!-- Compact Live Patch Status Bar (Maxroll Style) -->
+  <div class="live-ticker">
+    <div>
+      <span class="ticker-pulse"></span>
+      <strong>LIVE WORKBENCH:</strong>
+      <span style="color:var(--text-dim); margin-left:0.35rem;">
+        Below the Stone v1.0 Layer-3 Forge · Main Sequence EA Orbital Ratios · Noble Fates v1.0 Colony Chains
       </span>
-      <h1>Min-Max Every Run, Factory &amp; Extraction</h1>
-      <p class="subtitle">
-        Multi-stage crafting &amp; smelter ratio calculators, tactical completion maps with local browser save tracking, and structured item databases for PC &amp; indie releases.
-      </p>
-
-      <div class="search-wrap">
-        <Icon name="search" size={17} />
-        <input
-          id="hub-search"
-          class="input"
-          type="search"
-          placeholder="Search games, ratio calculators, maps, or genres..."
-          aria-label="Search games and tools"
-        />
-      </div>
-
-      <div class="stat-strip">
-        <div class="stat-pill">
-          <strong>{gamesRegistry.length} Active Hubs</strong>
-          <span>Nov 2026 Releases</span>
-        </div>
-        <div class="stat-pill">
-          <strong>12 Interactive Tools</strong>
-          <span>Planners &amp; Maps</span>
-        </div>
-        <div class="stat-pill">
-          <strong>{totalItems + totalPins}+ Data Nodes</strong>
-          <span>Recipes &amp; Coordinates</span>
-        </div>
-        <div class="stat-pill">
-          <strong>Instant Browser Save</strong>
-          <span>Zero Account Wall</span>
-        </div>
-      </div>
     </div>
-  </section>
-
-  <!-- Featured Game Poster Grid (Maxroll / Prydwen Style) -->
-  <section aria-label="Featured Game Hubs">
-    <div style="display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:0.5rem;">
-      <h2 style="margin:0;">Featured Game Tool Hubs</h2>
-      <span style="font-size:0.82rem; color:var(--muted);">Direct tool access — pick a module to jump straight in</span>
+    <div style="color:var(--text-dim); font-family:monospace; font-size:0.75rem;">
+      {gamesRegistry.length} Hubs · {totalItems} Recipes/Items · {totalPins} Map Coords
     </div>
+  </div>
 
-    <div class="grid-cards" id="hub-game-grid">
-      {gamesRegistry.map((game) => (
-        <article class="game-poster-card" data-search={`${game.title} ${game.genre} ${game.engine}`.toLowerCase()}>
-          <a href={`/${game.slug}/`} class="poster-media">
-            <img
-              src={game.art.header}
-              alt={`${game.title} cover art`}
-              width="460"
-              height="215"
-              loading="lazy"
-              decoding="async"
-            />
-            <span class="poster-badge">{game.statusBadge}</span>
+  <!-- Asymmetric Bento Grid (1 Lead Spotlight + 2x2 Action Tiles — Zero Fluff Paragraphs) -->
+  <section class="bento-grid" aria-label="Active Game Workbenches">
+    <div class="bento-lead">
+      <img
+        class="bento-lead-img"
+        src={leadGame.art.hero}
+        alt={leadGame.title}
+        width="1280"
+        height="720"
+        fetchpriority="high"
+        decoding="async"
+      />
+      <div class="bento-lead-shade"></div>
+      <div class="bento-lead-body">
+        <span class="badge rarity-Legendary" style="margin-bottom:0.45rem;">{leadGame.statusBadge}</span>
+        <h1 style="margin:0 0 0.25rem; font-size:1.75rem;">{leadGame.title} — Production &amp; Power Planner</h1>
+        <p style="margin:0 0 0.85rem; color:var(--text-dim); font-size:0.86rem; max-width:560px;">
+          Multi-stage smelter ratios, orbital assembler machine counts, kW load balancing &amp; sector resource coordinates.
+        </p>
+        <div style="display:flex; flex-wrap:wrap; gap:0.5rem;">
+          <a class="btn" href={`/${leadGame.slug}/calculator/`}>
+            <Icon name="calc" size={14} />
+            <span>Open Ratio Calculator</span>
           </a>
-          <div class="poster-body">
-            <span class="poster-genre">{game.genre}</span>
-            <h3 class="poster-title">
-              <a href={`/${game.slug}/`}>{game.title}</a>
-            </h3>
-            <p class="poster-desc">{game.summary}</p>
-            <div class="quick-tool-list">
-              <a class="quick-tool-row" href={`/${game.slug}/calculator/`}>
-                <span class="quick-tool-left">
-                  <Icon name="calc" size={15} />
-                  <span>Crafting &amp; Ratio Calculator</span>
-                </span>
-                <span class="quick-tool-meta">Planner →</span>
-              </a>
-              <a class="quick-tool-row" href={`/${game.slug}/map/`}>
-                <span class="quick-tool-left">
-                  <Icon name="map" size={15} />
-                  <span>Interactive Tactical Map</span>
-                </span>
-                <span class="quick-tool-meta">{game.mapPins.length} Nodes →</span>
-              </a>
-              <a class="quick-tool-row" href={`/${game.slug}/database/`}>
-                <span class="quick-tool-left">
-                  <Icon name="db" size={15} />
-                  <span>Item &amp; Recipe Database</span>
-                </span>
-                <span class="quick-tool-meta">{game.items.length} Items →</span>
-              </a>
+          <a class="btn btn-outline" href={`/${leadGame.slug}/map/`}>
+            <Icon name="map" size={14} />
+            <span>Sector Map ({leadGame.mapPins.length})</span>
+          </a>
+          <a class="btn btn-outline" href={`/${leadGame.slug}/database/`}>
+            <Icon name="db" size={14} />
+            <span>Module DB ({leadGame.items.length})</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="bento-side">
+      {otherGames.map((g) => (
+        <div class="bento-tile">
+          <img class="bento-tile-img" src={g.art.header} alt={g.title} width="460" height="215" loading="lazy" />
+          <div class="bento-tile-shade"></div>
+          <div class="bento-tile-content">
+            <span class="badge rarity-Rare" style="margin-bottom:0.3rem;">{g.statusBadge}</span>
+            <strong style="display:block; font-size:1.05rem; margin-bottom:0.45rem;">{g.title}</strong>
+            <div style="display:flex; flex-wrap:wrap; gap:0.35rem;">
+              <a class="btn btn-xs" href={`/${g.slug}/calculator/`}>Calculator</a>
+              <a class="btn btn-xs btn-outline" href={`/${g.slug}/map/`}>Map</a>
+              <a class="btn btn-xs btn-outline" href={`/${g.slug}/database/`}>DB</a>
             </div>
           </div>
-        </article>
+        </div>
       ))}
+
+      <a class="bento-tile" href="/below-the-stone/map/" style="background:linear-gradient(145deg, #131c2b 0%, #0b101b 100%);">
+        <div class="bento-tile-content">
+          <span class="badge rarity-Uncommon" style="margin-bottom:0.35rem;">SAVE SYNC READY</span>
+          <strong style="display:block; font-size:0.98rem; margin-bottom:0.25rem;">Interactive Completion Maps</strong>
+          <span style="font-size:0.78rem; color:var(--text-dim);">
+            Filter extraction pods, ore veins &amp; boss lairs. Saves locally or imports <code>.json</code> progress.
+          </span>
+        </div>
+      </a>
+
+      <a class="bento-tile" href="/main-sequence/calculator/?item=fusion-regulator" style="background:linear-gradient(145deg, #1a1628 0%, #0b101b 100%);">
+        <div class="bento-tile-content">
+          <span class="badge rarity-Epic" style="margin-bottom:0.35rem;">BOTTLENECK SOLVER</span>
+          <strong style="display:block; font-size:0.98rem; margin-bottom:0.25rem;">3-Tier Recursive BOM Engine</strong>
+          <span style="font-size:0.78rem; color:var(--text-dim);">
+            Instant raw-ore-to-endgame module breakdown with exact facility counts &amp; kW draw.
+          </span>
+        </div>
+      </a>
     </div>
   </section>
 
-  <!-- Direct Tool Launchpad -->
-  <section aria-label="Popular Tools">
-    <h2>Most Used Calculators &amp; Trackers</h2>
-    <div class="grid-cards">
-      <a class="card" href="/main-sequence/calculator/" style="text-decoration:none; color:inherit;">
-        <span class="badge rarity-Rare">Factory Throughput</span>
-        <h3 style="margin:0.55rem 0 0.35rem; color:#fff;">Main Sequence Smelter &amp; kW Ratio Planner</h3>
-        <p style="margin:0; font-size:0.85rem; color:var(--muted);">
-          Break down hull plating, conduits, and thruster manifolds into exact machine counts per minute and kW load.
-        </p>
-      </a>
-      <a class="card" href="/below-the-stone/map/" style="text-decoration:none; color:inherit;">
-        <span class="badge rarity-Legendary">Extraction Map</span>
-        <h3 style="margin:0.55rem 0 0.35rem; color:#fff;">Below the Stone 1.0 Layer &amp; Biome Tracker</h3>
-        <p style="margin:0; font-size:0.85rem; color:var(--muted);">
-          Track drill pod extraction points, fungal ore veins, and guardian arenas with browser completion sync.
-        </p>
-      </a>
-      <a class="card" href="/noble-fates/calculator/" style="text-decoration:none; color:inherit;">
-        <span class="badge rarity-Epic">Colony Economy</span>
-        <h3 style="margin:0.55rem 0 0.35rem; color:#fff;">Noble Fates 1.0 Prestige Crafting Calculator</h3>
-        <p style="margin:0; font-size:0.85rem; color:var(--muted);">
-          Optimize timber-to-hardwood plank chains and noble banquet furniture throughput for high-prestige halls.
-        </p>
-      </a>
+  <!-- SteamDB-Style High-Density Live Item & Crafting Matrix + Changelog Split -->
+  <section class="data-split" aria-label="Live Crafting Matrix and Patch Updates">
+    <div class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title">
+          <Icon name="db" size={16} />
+          <span>Indexed Crafting &amp; Resource Matrix</span>
+        </h2>
+        <div style="display:flex; flex-wrap:wrap; gap:0.4rem; align-items:center;">
+          <select id="matrix-game-filter" class="input" style="width:auto; padding:0.28rem 0.55rem; font-size:0.78rem;">
+            <option value="ALL">All Games ({totalItems})</option>
+            {gamesRegistry.map((g) => (
+              <option value={g.slug}>{g.title}</option>
+            ))}
+          </select>
+          <input
+            id="matrix-text-filter"
+            class="input"
+            type="search"
+            placeholder="Filter item, station, rarity..."
+            style="width:190px; padding:0.28rem 0.6rem; font-size:0.78rem;"
+          />
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Game</th>
+              <th>Item / Module</th>
+              <th>Rarity</th>
+              <th>Station</th>
+              <th>Base Val</th>
+              <th>Craft Margin</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="matrix-tbody">
+            {matrixRows.map((r) => (
+              <tr
+                data-game={r.gameSlug}
+                data-hay={`${r.gameTitle} ${r.item.name} ${r.item.rarity} ${r.item.biomeOrSource}`.toLowerCase()}
+              >
+                <td>
+                  <a href={`/${r.gameSlug}/`} title={r.gameTitle}>
+                    <img class="game-thumb-xs" src={r.gameHeader} alt={r.gameTitle} width="136" height="64" loading="lazy" />
+                  </a>
+                </td>
+                <td>
+                  <span class="item-cell">
+                    <span class={`item-glyph rarity-${r.item.rarity}`}>{r.code}</span>
+                    <strong>{r.item.name}</strong>
+                  </span>
+                </td>
+                <td><span class={`badge rarity-${r.item.rarity}`}>{r.item.rarity}</span></td>
+                <td style="color:var(--text-dim);">{r.item.biomeOrSource}</td>
+                <td><strong>{r.item.baseValue}</strong></td>
+                <td>
+                  {r.margin > 0 ? (
+                    <span style="color:var(--emerald); font-weight:700;">+{r.margin} pts</span>
+                  ) : (
+                    <span style="color:var(--text-muted);">Raw Input</span>
+                  )}
+                </td>
+                <td>
+                  {r.isCraftable ? (
+                    <a class="btn btn-xs" href={`/${r.gameSlug}/calculator/?item=${r.item.id}`}>Calc →</a>
+                  ) : (
+                    <a class="btn btn-xs btn-outline" href={`/${r.gameSlug}/database/`}>Source</a>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Right Column: Live Patch & Tool Changelog + Map Quick-Jump -->
+    <div style="display:flex; flex-direction:column; gap:1rem;">
+      <div class="panel">
+        <div class="panel-head">
+          <h2 class="panel-title">
+            <Icon name="bolt" size={15} />
+            <span>Recent Patch &amp; DB Updates</span>
+          </h2>
+        </div>
+        <ul class="changelog-list">
+          <li>
+            <div class="changelog-date">2026-11-23 · v1.0.2 INDEX</div>
+            <strong style="display:block; margin:0.15rem 0;">Below the Stone 1.0 Smelting Tree</strong>
+            <span style="color:var(--text-dim);">Added Layer-3 extraction drill pod markers, bronze ingot ratios &amp; delver armor recipes.</span>
+          </li>
+          <li>
+            <div class="changelog-date">2026-11-23 · EA BUILD</div>
+            <strong style="display:block; margin:0.15rem 0;">Main Sequence Orbital Power Load</strong>
+            <span style="color:var(--text-dim);">Wired recursive kW load solver for Arc Smelters, Wire Extruders &amp; Flux Regulators.</span>
+          </li>
+          <li>
+            <div class="changelog-date">2026-11-23 · v1.0 RELEASE</div>
+            <strong style="display:block; margin:0.15rem 0;">Noble Fates Prestige Furniture</strong>
+            <span style="color:var(--text-dim);">Indexed timber-to-plank carpentry ratios and banquet set value margins.</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2 class="panel-title">
+            <Icon name="map" size={15} />
+            <span>Tactical Map Workbenches</span>
+          </h2>
+        </div>
+        <ul class="changelog-list">
+          {gamesRegistry.map((g) => (
+            <li style="display:flex; align-items:center; justify-content:space-between; gap:0.5rem;">
+              <div>
+                <strong style="display:block;">{g.title}</strong>
+                <span style="color:var(--text-dim); font-size:0.75rem;">{g.mapPins.length} interactive pins · Save sync</span>
+              </div>
+              <a class="btn btn-xs btn-outline" href={`/${g.slug}/map/`}>Open Map →</a>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   </section>
 
   <script is:inline>
-    const searchInput = document.getElementById('hub-search');
-    const cards = Array.from(document.querySelectorAll('#hub-game-grid [data-search]'));
-    if (searchInput) {
-      searchInput.addEventListener('input', () => {
-        const q = searchInput.value.trim().toLowerCase();
-        cards.forEach((card) => {
-          const hay = card.getAttribute('data-search') || '';
-          card.style.display = !q || hay.includes(q) ? '' : 'none';
-        });
+    const gameSel = document.getElementById('matrix-game-filter');
+    const textInp = document.getElementById('matrix-text-filter');
+    const rows = Array.from(document.querySelectorAll('#matrix-tbody tr'));
+
+    function filterMatrix() {
+      const g = gameSel ? gameSel.value : 'ALL';
+      const q = textInp ? textInp.value.trim().toLowerCase() : '';
+      rows.forEach((tr) => {
+        const matchGame = g === 'ALL' || tr.getAttribute('data-game') === g;
+        const matchText = !q || (tr.getAttribute('data-hay') || '').includes(q);
+        tr.style.display = matchGame && matchText ? '' : 'none';
       });
     }
+    gameSel?.addEventListener('change', filterMatrix);
+    textInp?.addEventListener('input', filterMatrix);
   </script>
 </HubLayout>

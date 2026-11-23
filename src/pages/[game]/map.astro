@@ -18,88 +18,100 @@ interface Props {
 const { game } = Astro.props;
 const storageKey = `dropcodex_map_${game.slug}_v1`;
 const pinsJson = JSON.stringify(game.mapPins);
+
+const catColor: Record<string, string> = {
+  'Resource': '#22c55e',
+  'Extraction': '#f59e0b',
+  'Boss': '#f43f5e',
+  'Shrine / Upgrade': '#38bdf8',
+};
 ---
 <HubLayout
   title={`${game.title} Interactive Map & Completion Save Tracker — ${hubConfig.brandName}`}
   description={`Interactive tactical map, resource veins, extraction points, and browser save completion tracker for ${game.title}.`}
   ogImage={game.art.header}
 >
-  <GameHero
-    game={game}
-    active="map"
-    heading={`${game.title} Interactive Map`}
-    subtitle="Click markers on the tactical map or toggle rows in the completion tracker. Progress saves automatically in your browser."
-  />
+  <GameHero game={game} active="map" heading={`${game.title} — Interactive Tactical Map`} />
 
-  <MonetizationBar game={game} />
-
-  <section class="card">
-    <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:0.75rem; margin-bottom:1rem;">
-      <div style="display:flex; flex-wrap:wrap; gap:0.45rem;" id="map-filters">
-        <button class="btn" type="button" data-cat="ALL">All Nodes ({game.mapPins.length})</button>
-        <button class="btn btn-outline" type="button" data-cat="Resource">Resources</button>
-        <button class="btn btn-outline" type="button" data-cat="Extraction">Extraction</button>
-        <button class="btn btn-outline" type="button" data-cat="Boss">Bosses</button>
-        <button class="btn btn-outline" type="button" data-cat="Shrine / Upgrade">Upgrades</button>
+  <div class="panel">
+    <div class="panel-head">
+      <div style="display:flex; flex-wrap:wrap; gap:0.35rem;" id="map-filters">
+        <button class="btn btn-xs" type="button" data-cat="ALL">All ({game.mapPins.length})</button>
+        <button class="btn btn-xs btn-outline" type="button" data-cat="Resource">Resources</button>
+        <button class="btn btn-xs btn-outline" type="button" data-cat="Extraction">Extraction</button>
+        <button class="btn btn-xs btn-outline" type="button" data-cat="Boss">Bosses</button>
+        <button class="btn btn-xs btn-outline" type="button" data-cat="Shrine / Upgrade">Upgrades</button>
       </div>
-      <div style="display:flex; flex-wrap:wrap; align-items:center; gap:0.5rem;">
-        <label class="btn btn-outline" style="cursor:pointer;">
-          Import Save (.JSON)
+      <div style="display:flex; flex-wrap:wrap; align-items:center; gap:0.4rem;">
+        <button class="btn btn-xs btn-outline zoom-btn" type="button" data-z="1">1.0x</button>
+        <button class="btn btn-xs btn-outline zoom-btn" type="button" data-z="1.35">1.35x</button>
+        <button class="btn btn-xs btn-outline zoom-btn" type="button" data-z="1.75">1.75x</button>
+        <label class="btn btn-xs btn-outline" style="cursor:pointer;">
+          Import .JSON
           <input id="save-json-input" type="file" accept=".json" style="display:none;" />
         </label>
-        <button id="map-reset-btn" class="btn btn-outline" type="button">Reset</button>
+        <button id="map-reset-btn" class="btn btn-xs btn-outline" type="button">Reset</button>
       </div>
     </div>
 
-    <div class="map-workspace">
-      <!-- Left: Tactical Map Canvas with Official In-Game Backdrop -->
-      <div class="map-stage" id="map-canvas">
-        <img class="map-stage-img" src={game.art.mapBg} alt={`${game.title} sector backdrop`} width="600" height="338" decoding="async" />
-        <div class="map-stage-grid"></div>
-        {game.mapPins.map((pin) => (
-          <button
-            type="button"
-            class="map-pin-btn"
-            data-pin-id={pin.id}
-            data-pin-cat={pin.category}
-            title={`${pin.title} — ${pin.note}`}
-            style={`position:absolute; left:${pin.xPercent}%; top:${pin.yPercent}%; transform:translate(-50%,-50%); display:inline-flex; align-items:center; gap:0.35rem; padding:0.35rem 0.68rem; border-radius:999px; border:1.5px solid var(--accent); background:rgba(9,13,20,0.94); color:#fff; font-size:0.75rem; font-weight:800; cursor:pointer; box-shadow:0 6px 18px rgba(0,0,0,0.75); z-index:3; white-space:nowrap;`}
-          >
-            <span style="width:7px; height:7px; border-radius:999px; background:var(--accent); display:inline-block;"></span>
-            <span>{pin.title}</span>
-          </button>
-        ))}
+    <div class="panel-body">
+      <div class="map-workspace">
+        <!-- Left: Zoomable Tactical Radar Canvas -->
+        <div class="map-stage">
+          <div class="map-stage-inner" id="map-zoom-layer">
+            <img class="map-stage-img" src={game.art.mapBg} alt={`${game.title} tactical sector`} width="600" height="338" decoding="async" />
+            <div class="map-stage-grid"></div>
+            {game.mapPins.map((pin) => {
+              const dot = catColor[pin.category] ?? '#f59e0b';
+              return (
+                <button
+                  type="button"
+                  class="map-pin-btn"
+                  data-pin-id={pin.id}
+                  data-pin-cat={pin.category}
+                  title={`${pin.title} — ${pin.note}`}
+                  style={`position:absolute; left:${pin.xPercent}%; top:${pin.yPercent}%; transform:translate(-50%,-50%); display:inline-flex; align-items:center; gap:0.35rem; padding:0.3rem 0.62rem; border-radius:999px; border:1.5px solid ${dot}; background:rgba(7,10,15,0.92); color:#fff; font-size:0.74rem; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,0.8); z-index:3; white-space:nowrap;`}
+                >
+                  <span style={`width:7px; height:7px; border-radius:999px; background:${dot}; box-shadow:0 0 6px ${dot};`}></span>
+                  <span>{pin.title}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <!-- Right: Node Checklist & Active Pin Inspector -->
+        <aside style="display:flex; flex-direction:column; gap:0.7rem;">
+          <div class="stat-pill" style="margin:0;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
+              <span>Sector Completion</span>
+              <strong id="map-progress-badge" style="font-size:0.9rem; margin:0; color:var(--accent-bright);">0 / {game.mapPins.length}</strong>
+            </div>
+            <div style="width:100%; height:6px; border-radius:999px; background:var(--surface-2); overflow:hidden;">
+              <div id="map-progress-bar" style="width:0%; height:100%; background:linear-gradient(90deg, #f59e0b, #22c55e); transition:width 0.2s ease;"></div>
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:0.45rem; max-height:365px; overflow-y:auto;">
+            {game.mapPins.map((pin) => (
+              <label
+                data-row-cat={pin.category}
+                style="display:flex; align-items:flex-start; gap:0.5rem; padding:0.5rem 0.6rem; border-radius:6px; border:1px solid var(--border); background:var(--bg-rail); cursor:pointer;"
+              >
+                <input type="checkbox" class="pin-check" data-check-id={pin.id} style="margin-top:0.2rem;" />
+                <span style="min-width:0; flex:1;">
+                  <strong style="display:block; font-size:0.81rem;">{pin.title}</strong>
+                  <span style="display:block; font-size:0.72rem; color:var(--text-dim);">{pin.category} · [{pin.xPercent}, {pin.yPercent}] — {pin.note}</span>
+                </span>
+              </label>
+            ))}
+          </div>
+        </aside>
       </div>
-
-      <!-- Right: Completion Sidebar & Progress Meter -->
-      <aside class="card" style="background:rgba(9,13,20,0.65); display:flex; flex-direction:column; gap:0.8rem;">
-        <div>
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
-            <strong style="font-size:0.92rem;">Completion Progress</strong>
-            <span id="map-progress-badge" class="badge rarity-Legendary">0 / {game.mapPins.length}</span>
-          </div>
-          <div style="width:100%; height:8px; border-radius:999px; background:var(--surface-2); overflow:hidden;">
-            <div id="map-progress-bar" style="width:0%; height:100%; background:linear-gradient(90deg, #f59e0b, #10b981); transition:width 0.2s ease;"></div>
-          </div>
-        </div>
-
-        <div style="display:flex; flex-direction:column; gap:0.55rem; max-height:320px; overflow-y:auto;">
-          {game.mapPins.map((pin) => (
-            <label
-              data-row-cat={pin.category}
-              style="display:flex; align-items:flex-start; gap:0.55rem; padding:0.55rem; border-radius:8px; border:1px solid var(--border); background:var(--surface); cursor:pointer;"
-            >
-              <input type="checkbox" class="pin-check" data-check-id={pin.id} style="margin-top:0.22rem;" />
-              <span style="min-width:0; flex:1;">
-                <strong style="display:block; font-size:0.84rem;">{pin.title}</strong>
-                <span style="display:block; font-size:0.74rem; color:var(--muted);">{pin.category} · ({pin.xPercent}, {pin.yPercent}) — {pin.note}</span>
-              </span>
-            </label>
-          ))}
-        </div>
-      </aside>
     </div>
-  </section>
+  </div>
+
+  <MonetizationBar game={game} />
 
   <script is:inline define:vars={{ storageKey, pinsJson }}>
     const pins = JSON.parse(pinsJson);
@@ -111,6 +123,7 @@ const pinsJson = JSON.stringify(game.mapPins);
 
     const badge = document.getElementById('map-progress-badge');
     const bar = document.getElementById('map-progress-bar');
+    const zoomLayer = document.getElementById('map-zoom-layer');
     const checks = Array.from(document.querySelectorAll('.pin-check'));
     const pinBtns = Array.from(document.querySelectorAll('.map-pin-btn'));
 
@@ -120,8 +133,7 @@ const pinsJson = JSON.stringify(game.mapPins);
       });
       pinBtns.forEach((btn) => {
         const done = foundSet.has(btn.getAttribute('data-pin-id'));
-        btn.style.opacity = done ? '0.48' : '1';
-        btn.style.borderColor = done ? '#10b981' : 'var(--accent)';
+        btn.style.opacity = done ? '0.42' : '1';
       });
       const pct = pins.length > 0 ? Math.round((foundSet.size / pins.length) * 100) : 0;
       if (badge) badge.textContent = foundSet.size + ' / ' + pins.length + ' (' + pct + '%)';
@@ -140,6 +152,13 @@ const pinsJson = JSON.stringify(game.mapPins);
     checks.forEach((ch) => ch.addEventListener('change', () => togglePin(ch.getAttribute('data-check-id'))));
     pinBtns.forEach((btn) => btn.addEventListener('click', () => togglePin(btn.getAttribute('data-pin-id'))));
 
+    document.querySelectorAll('.zoom-btn').forEach((zb) => {
+      zb.addEventListener('click', () => {
+        const scale = zb.getAttribute('data-z') || '1';
+        if (zoomLayer) zoomLayer.style.transform = 'scale(' + scale + ')';
+      });
+    });
+
     document.querySelectorAll('#map-filters button').forEach((fBtn) => {
       fBtn.addEventListener('click', () => {
         const cat = fBtn.getAttribute('data-cat');
@@ -152,30 +171,21 @@ const pinsJson = JSON.stringify(game.mapPins);
       });
     });
 
-    const resetBtn = document.getElementById('map-reset-btn');
-    if (resetBtn) {
-      resetBtn.addEventListener('click', () => {
-        foundSet.clear();
-        syncUI();
-      });
-    }
+    document.getElementById('map-reset-btn')?.addEventListener('click', () => {
+      foundSet.clear();
+      syncUI();
+    });
 
-    const fileInput = document.getElementById('save-json-input');
-    if (fileInput) {
-      fileInput.addEventListener('change', async (e) => {
-        const file = e.target.files && e.target.files[0];
-        if (!file) return;
-        try {
-          const text = await file.text();
-          const parsed = JSON.parse(text);
-          const arr = Array.isArray(parsed) ? parsed : (parsed.completedPins || []);
-          arr.forEach((id) => {
-            if (typeof id === 'string') foundSet.add(id);
-          });
-          syncUI();
-        } catch {}
-      });
-    }
+    document.getElementById('save-json-input')?.addEventListener('change', async (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      try {
+        const parsed = JSON.parse(await file.text());
+        const arr = Array.isArray(parsed) ? parsed : (parsed.completedPins || []);
+        arr.forEach((id) => { if (typeof id === 'string') foundSet.add(id); });
+        syncUI();
+      } catch {}
+    });
 
     syncUI();
   </script>

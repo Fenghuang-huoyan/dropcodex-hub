@@ -16,7 +16,7 @@ interface Props {
   game: GameModule;
 }
 const { game } = Astro.props;
-const craftableItems = game.items.filter((i) => i.recipe && i.recipe.length > 0);
+const craftableItems = [...game.items.filter((i) => i.recipe && i.recipe.length > 0)].reverse();
 const serializedItems = JSON.stringify(game.items);
 ---
 <HubLayout
@@ -24,66 +24,79 @@ const serializedItems = JSON.stringify(game.items);
   description={`Calculate exact raw resource requirements, smelter ratios, power load, and profit margin for ${game.title}.`}
   ogImage={game.art.header}
 >
-  <GameHero
-    game={game}
-    active="calculator"
-    heading={`${game.title} Crafting & Ratio Calculator`}
-    subtitle="Select any craftable target and desired output per minute to recursively break down raw materials, machine counts, kW power load, and net value added."
-  />
+  <GameHero game={game} active="calculator" heading={`${game.title} — Production & Ratio Planner`} />
+
+  <!-- Calculator Workbench Immediately Above the Fold -->
+  <div class="panel">
+    <div class="panel-head">
+      <h2 class="panel-title">Target Production Parameters</h2>
+      <div style="display:flex; gap:0.4rem;">
+        <button class="btn btn-xs btn-outline rate-preset" type="button" data-rate="15">15/m</button>
+        <button class="btn btn-xs btn-outline rate-preset" type="button" data-rate="30">30/m</button>
+        <button class="btn btn-xs btn-outline rate-preset" type="button" data-rate="60">60/m</button>
+        <button class="btn btn-xs btn-outline rate-preset" type="button" data-rate="120">120/m</button>
+      </div>
+    </div>
+
+    <div class="panel-body">
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap:0.85rem; margin-bottom:1rem;">
+        <label>
+          <span style="display:block; font-size:0.76rem; font-weight:700; color:var(--text-dim); margin-bottom:0.3rem; text-transform:uppercase;">Target Output Module / Item</span>
+          <select id="calc-target-item" class="input">
+            {(craftableItems.length > 0 ? craftableItems : game.items).map((it) => (
+              <option value={it.id}>{it.name} ({it.rarity} · Val {it.baseValue})</option>
+            ))}
+          </select>
+        </label>
+        <label>
+          <span style="display:block; font-size:0.76rem; font-weight:700; color:var(--text-dim); margin-bottom:0.3rem; text-transform:uppercase;">Desired Output / Minute</span>
+          <input id="calc-rate" class="input" type="number" min="1" max="10000" step="1" value="30" />
+        </label>
+      </div>
+
+      <div class="stat-strip">
+        <div class="stat-pill">
+          <span>Gross Output / Min</span>
+          <strong id="out-gross" style="color:var(--emerald);">—</strong>
+        </div>
+        <div class="stat-pill">
+          <span>Raw Ore Cost / Min</span>
+          <strong id="out-cost">—</strong>
+        </div>
+        <div class="stat-pill">
+          <span>Net Value Added / Min</span>
+          <strong id="out-net" style="color:var(--accent-bright);">—</strong>
+        </div>
+        <div class="stat-pill">
+          <span>Total Machines &amp; Power</span>
+          <strong id="out-power" style="color:var(--sky);">—</strong>
+        </div>
+      </div>
+
+      <!-- SCIM-Style Visual Production Chain Flow -->
+      <div style="font-size:0.76rem; font-weight:700; color:var(--text-dim); text-transform:uppercase; margin-bottom:0.35rem;">
+        Visual Production Chain Flow
+      </div>
+      <div id="calc-flow-chain" class="flow-chain" aria-live="polite"></div>
+
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Stage / Material</th>
+              <th>Rarity</th>
+              <th>Throughput / Min</th>
+              <th>Facilities Required</th>
+              <th>Facility / Source</th>
+            </tr>
+          </thead>
+          <tbody id="calc-bom-rows"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
   <MonetizationBar game={game} />
-
-  <section class="card" aria-label="Production Ratio Calculator">
-    <div class="grid-cards" style="margin-top:0; margin-bottom:1.1rem;">
-      <label>
-        <span style="display:block; font-size:0.82rem; font-weight:700; margin-bottom:0.35rem; color:#cbd5e1;">Target Output Item</span>
-        <select id="calc-target-item" class="input">
-          {(craftableItems.length > 0 ? craftableItems : game.items).map((it) => (
-            <option value={it.id}>{it.name} ({it.rarity} · Base Value {it.baseValue})</option>
-          ))}
-        </select>
-      </label>
-      <label>
-        <span style="display:block; font-size:0.82rem; font-weight:700; margin-bottom:0.35rem; color:#cbd5e1;">Target Units / Minute</span>
-        <input id="calc-rate" class="input" type="number" min="1" max="10000" step="1" value="30" />
-      </label>
-    </div>
-
-    <div class="stat-strip" style="margin-top:0; margin-bottom:1.4rem;">
-      <div class="stat-pill">
-        <span>Gross Output Value / Min</span>
-        <strong id="out-gross" style="color:var(--emerald); font-size:1.25rem;">—</strong>
-      </div>
-      <div class="stat-pill">
-        <span>Raw Feedstock Cost / Min</span>
-        <strong id="out-cost" style="font-size:1.25rem;">—</strong>
-      </div>
-      <div class="stat-pill">
-        <span>Net Value Margin / Min</span>
-        <strong id="out-net" style="color:var(--accent-hover); font-size:1.25rem;">—</strong>
-      </div>
-      <div class="stat-pill">
-        <span>Estimated Facility Load</span>
-        <strong id="out-power" style="color:var(--sky); font-size:1.25rem;">—</strong>
-      </div>
-    </div>
-
-    <h2 style="margin-top:0.5rem;">Recursive Bill of Materials &amp; Facility Count</h2>
-    <div class="table-scroll">
-      <table>
-        <thead>
-          <tr>
-            <th>Material / Stage</th>
-            <th>Rarity</th>
-            <th>Required / Min</th>
-            <th>Facilities Needed</th>
-            <th>Source / Station</th>
-          </tr>
-        </thead>
-        <tbody id="calc-bom-rows"></tbody>
-      </table>
-    </div>
-  </section>
 
   <script is:inline define:vars={{ serializedItems }}>
     const items = JSON.parse(serializedItems);
@@ -91,10 +104,17 @@ const serializedItems = JSON.stringify(game.items);
     const targetSel = document.getElementById('calc-target-item');
     const rateInput = document.getElementById('calc-rate');
     const bomBody = document.getElementById('calc-bom-rows');
+    const flowEl = document.getElementById('calc-flow-chain');
     const grossEl = document.getElementById('out-gross');
     const costEl = document.getElementById('out-cost');
     const netEl = document.getElementById('out-net');
     const powerEl = document.getElementById('out-power');
+
+    // Deep-link support (?item=fusion-regulator)
+    const urlItem = new URLSearchParams(window.location.search).get('item');
+    if (urlItem && itemMap.has(urlItem) && targetSel) {
+      targetSel.value = urlItem;
+    }
 
     function compute() {
       const targetId = targetSel.value;
@@ -103,27 +123,29 @@ const serializedItems = JSON.stringify(game.items);
       if (!rootItem) return;
 
       const totals = new Map();
+      const depths = new Map();
       let totalPowerKw = 0;
       let totalMachines = 0;
       let rawCost = 0;
 
-      function walk(id, neededPerMin) {
+      function walk(id, neededPerMin, depth) {
         const node = itemMap.get(id);
         if (!node) return;
         totals.set(id, (totals.get(id) || 0) + neededPerMin);
+        depths.set(id, Math.max(depths.get(id) || 0, depth));
         const craftSec = node.craftTimeSec || 4;
         const machines = neededPerMin / (60 / craftSec);
         totalMachines += machines;
         totalPowerKw += machines * (node.powerKw || 0);
 
         if (node.recipe && node.recipe.length > 0) {
-          node.recipe.forEach((ing) => walk(ing.itemId, neededPerMin * ing.qty));
+          node.recipe.forEach((ing) => walk(ing.itemId, neededPerMin * ing.qty, depth + 1));
         } else {
           rawCost += neededPerMin * (node.baseValue || 0);
         }
       }
 
-      walk(targetId, ratePerMin);
+      walk(targetId, ratePerMin, 0);
       const gross = ratePerMin * (rootItem.baseValue || 0);
       const net = gross - rawCost;
 
@@ -131,26 +153,50 @@ const serializedItems = JSON.stringify(game.items);
       costEl.textContent = rawCost.toLocaleString('en-US') + ' pts';
       netEl.textContent = '+' + net.toLocaleString('en-US') + ' pts';
       powerEl.textContent = totalPowerKw > 0
-        ? Math.ceil(totalPowerKw) + ' kW · ' + totalMachines.toFixed(1) + ' units'
-        : totalMachines.toFixed(1) + ' stations';
+        ? Math.ceil(totalPowerKw) + ' kW · ' + totalMachines.toFixed(1) + 'x'
+        : totalMachines.toFixed(1) + 'x stations';
+
+      // Sort from raw inputs (highest depth) -> final output (depth 0) for visual flowchart
+      const ordered = Array.from(totals.entries()).sort((a, b) => (depths.get(b[0]) || 0) - (depths.get(a[0]) || 0));
+
+      flowEl.innerHTML = ordered
+        .map(([id, req], idx) => {
+          const n = itemMap.get(id);
+          const machines = (req / (60 / (n.craftTimeSec || 4))).toFixed(1);
+          const code = n.name.split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
+          const arrow = idx < ordered.length - 1 ? '<span class="flow-arrow">──▶</span>' : '';
+          return (
+            '<div class="flow-node">' +
+            '<span class="item-glyph rarity-' + n.rarity + '">' + code + '</span>' +
+            '<div><strong style="display:block;font-size:0.8rem">' + n.name + '</strong>' +
+            '<span style="font-size:0.72rem;color:var(--text-dim)">' + req.toFixed(1) + '/m · ' + machines + 'x ' + n.biomeOrSource + '</span></div>' +
+            '</div>' + arrow
+          );
+        })
+        .join('');
 
       bomBody.innerHTML = '';
-      totals.forEach((reqRate, id) => {
+      Array.from(totals.entries()).forEach(([id, reqRate]) => {
         const node = itemMap.get(id);
-        const craftSec = node.craftTimeSec || 4;
-        const machines = (reqRate / (60 / craftSec)).toFixed(1);
+        const machines = (reqRate / (60 / (node.craftTimeSec || 4))).toFixed(1);
         const code = node.name.split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
         const tr = document.createElement('tr');
         tr.innerHTML =
           '<td><span class="item-cell"><span class="item-glyph rarity-' + node.rarity + '">' + code + '</span><strong>' + node.name + '</strong></span></td>' +
           '<td><span class="badge rarity-' + node.rarity + '">' + node.rarity + '</span></td>' +
           '<td><strong>' + reqRate.toFixed(1) + '</strong> / min</td>' +
-          '<td>' + machines + 'x</td>' +
-          '<td>' + node.biomeOrSource + '</td>';
+          '<td><strong>' + machines + 'x</strong></td>' +
+          '<td style="color:var(--text-dim)">' + node.biomeOrSource + '</td>';
         bomBody.appendChild(tr);
       });
     }
 
+    document.querySelectorAll('.rate-preset').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        rateInput.value = btn.getAttribute('data-rate') || '30';
+        compute();
+      });
+    });
     targetSel.addEventListener('change', compute);
     rateInput.addEventListener('input', compute);
     compute();
