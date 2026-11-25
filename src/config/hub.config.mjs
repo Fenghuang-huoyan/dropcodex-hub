@@ -9,6 +9,6 @@ export const hubConfig = {
   siteUrl: 'https://dropcodex.com',
   tagline: 'Verified Game Calculators, Interactive Maps, Crafting Trees & Live Trade Databases.',
   editorialEmail: 'editorial@dropcodex.com',
-  gaMeasurementId: '', // Fill GA4 ID (G-XXXXXXXXXX) after property creation
+  gaMeasurementId: 'G-J7Q8N0GT9D',
   indexNowKey: 'c4e91f8a2b70d3e65912a8c04f7b6e31',
 };
