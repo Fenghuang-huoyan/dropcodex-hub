@@ -6,8 +6,16 @@ import { gamesRegistry } from '../data/games';
 
 const [leadGame, ...otherGames] = gamesRegistry;
 
-// Flatten all items across games with recursive raw-ore crafting margin for SteamDB-style dense table
-const matrixRows = gamesRegistry.flatMap((g) => {
+const RARITY_RANK: Record<string, number> = {
+  Legendary: 5,
+  Epic: 4,
+  Rare: 3,
+  Uncommon: 2,
+  Common: 1,
+};
+
+// Flatten all items across games with recursive raw-ore crafting margin & visual recipe input icons
+const rawMatrixRows = gamesRegistry.flatMap((g, gIdx) => {
   const map = new Map(g.items.map((i) => [i.id, i]));
   function calcRawCost(item: typeof g.items[number], depth = 0): number {
     if (depth > 16 || !item.recipe || item.recipe.length === 0) return item.baseValue;
@@ -21,7 +29,20 @@ const matrixRows = gamesRegistry.flatMap((g) => {
     const isCraftable = Boolean(it.recipe && it.recipe.length > 0);
     const margin = isCraftable ? it.baseValue - calcRawCost(it) : 0;
     const code = it.name.split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
+    const recipeInputs = (it.recipe || []).slice(0, 3).map((ing) => {
+      const sub = map.get(ing.itemId);
+      const subName = sub ? sub.name : ing.itemId;
+      return {
+        qty: ing.qty,
+        name: subName,
+        iconUrl: sub?.iconUrl,
+        code: subName.split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase(),
+        rarity: sub?.rarity || 'Common',
+      };
+    });
+    const extraCount = Math.max(0, (it.recipe?.length || 0) - 3);
     return {
+      gameIdx: gIdx,
       gameSlug: g.slug,
       gameTitle: g.title,
       gameHeader: g.art.header,
@@ -29,8 +50,18 @@ const matrixRows = gamesRegistry.flatMap((g) => {
       code,
       margin,
       isCraftable,
+      recipeInputs,
+      extraCount,
     };
   });
+});
+
+// Put high-tier craftable bottlenecks above raw ores so first-time visitors immediately see interactive recipes & icons
+const matrixRows = [...rawMatrixRows].sort((a, b) => {
+  if (a.isCraftable !== b.isCraftable) return a.isCraftable ? -1 : 1;
+  const rDiff = (RARITY_RANK[b.item.rarity] || 0) - (RARITY_RANK[a.item.rarity] || 0);
+  if (rDiff !== 0) return rDiff;
+  return a.gameIdx - b.gameIdx;
 });
 
 const totalItems = matrixRows.length;
@@ -151,9 +182,9 @@ const totalPins = gamesRegistry.reduce((s, g) => s + g.mapPins.length, 0);
               <th>Game</th>
               <th>Item / Module</th>
               <th>Rarity</th>
+              <th>Recipe Inputs</th>
               <th>Station</th>
-              <th>Base Val</th>
-              <th>Craft Margin</th>
+              <th>Net Margin</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -186,13 +217,36 @@ const totalPins = gamesRegistry.reduce((s, g) => s + g.mapPins.length, 0);
                   </span>
                 </td>
                 <td><span class={`badge rarity-${r.item.rarity}`}>{r.item.rarity}</span></td>
-                <td style="color:var(--text-dim);">{r.item.biomeOrSource}</td>
-                <td><strong>{r.item.baseValue}</strong></td>
+                <td>
+                  {r.recipeInputs.length > 0 ? (
+                    <span style="display:inline-flex; align-items:center; gap:0.3rem; flex-wrap:nowrap;">
+                      {r.recipeInputs.map((ing) => (
+                        <span
+                          title={`${ing.qty}x ${ing.name}`}
+                          style="display:inline-flex;align-items:center;gap:0.2rem;padding:0.1rem 0.32rem;border-radius:4px;background:var(--bg-rail);border:1px solid var(--border);font-size:0.72rem;color:var(--text-dim);white-space:nowrap;"
+                        >
+                          <strong style="color:var(--text);">{ing.qty}×</strong>
+                          {ing.iconUrl ? (
+                            <img src={ing.iconUrl} alt={ing.name} width="16" height="16" loading="lazy" style="width:16px;height:16px;object-fit:contain;flex-shrink:0;" />
+                          ) : (
+                            <span style="font-size:0.65rem;font-weight:800;">{ing.code}</span>
+                          )}
+                        </span>
+                      ))}
+                      {r.extraCount > 0 && (
+                        <span style="font-size:0.7rem;color:var(--text-muted);">+{r.extraCount}</span>
+                      )}
+                    </span>
+                  ) : (
+                    <span style="color:var(--text-muted); font-size:0.76rem;">Raw Feedstock</span>
+                  )}
+                </td>
+                <td style="color:var(--text-dim); font-size:0.8rem;">{r.item.biomeOrSource}</td>
                 <td>
                   {r.margin > 0 ? (
-                    <span style="color:var(--emerald); font-weight:700;">+{r.margin} pts</span>
+                    <span style="color:var(--emerald); font-weight:700; white-space:nowrap;">+{r.margin.toLocaleString('en-US')} pts</span>
                   ) : (
-                    <span style="color:var(--text-muted);">Raw Input</span>
+                    <span style="color:var(--text-muted); font-size:0.76rem;">Val {r.item.baseValue}</span>
                   )}
                 </td>
                 <td>
