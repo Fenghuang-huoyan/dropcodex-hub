@@ -128,33 +128,47 @@ const serializedItems = JSON.stringify(game.items);
       let totalMachines = 0;
       let rawCost = 0;
 
+      function renderGlyph(n) {
+        if (n.iconUrl) {
+          return '<img src="' + n.iconUrl + '" alt="" width="26" height="26" decoding="async" style="width:26px;height:26px;object-fit:contain;border-radius:5px;border:1px solid var(--border);background:var(--surface-2);padding:2px;flex-shrink:0;" />';
+        }
+        const code = n.name.split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
+        return '<span class="item-glyph rarity-' + n.rarity + '">' + code + '</span>';
+      }
+
       function walk(id, neededPerMin, depth) {
+        if (depth > 16) return;
         const node = itemMap.get(id);
         if (!node) return;
         totals.set(id, (totals.get(id) || 0) + neededPerMin);
         depths.set(id, Math.max(depths.get(id) || 0, depth));
         const craftSec = node.craftTimeSec || 4;
-        const machines = neededPerMin / (60 / craftSec);
+        const outQty = node.outputQty || 1;
+        const batchesPerMin = neededPerMin / outQty;
+        const machines = batchesPerMin / (60 / craftSec);
         totalMachines += machines;
         totalPowerKw += machines * (node.powerKw || 0);
 
         if (node.recipe && node.recipe.length > 0) {
-          node.recipe.forEach((ing) => walk(ing.itemId, neededPerMin * ing.qty, depth + 1));
+          node.recipe.forEach((ing) => walk(ing.itemId, batchesPerMin * ing.qty, depth + 1));
         } else {
           rawCost += neededPerMin * (node.baseValue || 0);
         }
       }
 
       walk(targetId, ratePerMin, 0);
-      const gross = ratePerMin * (rootItem.baseValue || 0);
-      const net = gross - rawCost;
+      const gross = Math.round(ratePerMin * (rootItem.baseValue || 0));
+      const costRounded = Math.round(rawCost);
+      const net = gross - costRounded;
 
       grossEl.textContent = gross.toLocaleString('en-US') + ' pts';
-      costEl.textContent = rawCost.toLocaleString('en-US') + ' pts';
-      netEl.textContent = '+' + net.toLocaleString('en-US') + ' pts';
-      powerEl.textContent = totalPowerKw > 0
-        ? Math.ceil(totalPowerKw) + ' kW · ' + totalMachines.toFixed(1) + 'x'
-        : totalMachines.toFixed(1) + 'x stations';
+      costEl.textContent = costRounded.toLocaleString('en-US') + ' pts';
+      netEl.textContent = (net >= 0 ? '+' : '') + net.toLocaleString('en-US') + ' pts';
+      powerEl.textContent = totalPowerKw >= 1000
+        ? (totalPowerKw / 1000).toFixed(1) + ' MW · ' + totalMachines.toFixed(1) + 'x'
+        : totalPowerKw > 0
+          ? Math.ceil(totalPowerKw) + ' kW · ' + totalMachines.toFixed(1) + 'x'
+          : totalMachines.toFixed(1) + 'x stations';
 
       // Sort from raw inputs (highest depth) -> final output (depth 0) for visual flowchart
       const ordered = Array.from(totals.entries()).sort((a, b) => (depths.get(b[0]) || 0) - (depths.get(a[0]) || 0));
@@ -162,12 +176,11 @@ const serializedItems = JSON.stringify(game.items);
       flowEl.innerHTML = ordered
         .map(([id, req], idx) => {
           const n = itemMap.get(id);
-          const machines = (req / (60 / (n.craftTimeSec || 4))).toFixed(1);
-          const code = n.name.split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
+          const machines = ((req / (n.outputQty || 1)) / (60 / (n.craftTimeSec || 4))).toFixed(1);
           const arrow = idx < ordered.length - 1 ? '<span class="flow-arrow">──▶</span>' : '';
           return (
             '<div class="flow-node">' +
-            '<span class="item-glyph rarity-' + n.rarity + '">' + code + '</span>' +
+            renderGlyph(n) +
             '<div><strong style="display:block;font-size:0.8rem">' + n.name + '</strong>' +
             '<span style="font-size:0.72rem;color:var(--text-dim)">' + req.toFixed(1) + '/m · ' + machines + 'x ' + n.biomeOrSource + '</span></div>' +
             '</div>' + arrow
@@ -178,11 +191,10 @@ const serializedItems = JSON.stringify(game.items);
       bomBody.innerHTML = '';
       Array.from(totals.entries()).forEach(([id, reqRate]) => {
         const node = itemMap.get(id);
-        const machines = (reqRate / (60 / (node.craftTimeSec || 4))).toFixed(1);
-        const code = node.name.split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
+        const machines = ((reqRate / (node.outputQty || 1)) / (60 / (node.craftTimeSec || 4))).toFixed(1);
         const tr = document.createElement('tr');
         tr.innerHTML =
-          '<td><span class="item-cell"><span class="item-glyph rarity-' + node.rarity + '">' + code + '</span><strong>' + node.name + '</strong></span></td>' +
+          '<td><span class="item-cell">' + renderGlyph(node) + '<strong>' + node.name + '</strong></span></td>' +
           '<td><span class="badge rarity-' + node.rarity + '">' + node.rarity + '</span></td>' +
           '<td><strong>' + reqRate.toFixed(1) + '</strong> / min</td>' +
           '<td><strong>' + machines + 'x</strong></td>' +

@@ -9,12 +9,13 @@ const [leadGame, ...otherGames] = gamesRegistry;
 // Flatten all items across games with recursive raw-ore crafting margin for SteamDB-style dense table
 const matrixRows = gamesRegistry.flatMap((g) => {
   const map = new Map(g.items.map((i) => [i.id, i]));
-  function calcRawCost(item: typeof g.items[number]): number {
-    if (!item.recipe || item.recipe.length === 0) return item.baseValue;
-    return item.recipe.reduce((sum, ing) => {
+  function calcRawCost(item: typeof g.items[number], depth = 0): number {
+    if (depth > 16 || !item.recipe || item.recipe.length === 0) return item.baseValue;
+    const rawSum = item.recipe.reduce((sum, ing) => {
       const sub = map.get(ing.itemId);
-      return sum + (sub ? calcRawCost(sub) : 0) * ing.qty;
+      return sum + (sub ? calcRawCost(sub, depth + 1) : 0) * ing.qty;
     }, 0);
+    return Math.round(rawSum / (item.outputQty || 1));
   }
   return g.items.map((it) => {
     const isCraftable = Boolean(it.recipe && it.recipe.length > 0);
@@ -106,12 +107,12 @@ const totalPins = gamesRegistry.reduce((s, g) => s + g.mapPins.length, 0);
         </div>
       ))}
 
-      <a class="bento-tile" href="/main-sequence/calculator/?item=fusion-regulator" style="background:linear-gradient(145deg, #1a1628 0%, #0b101b 100%);">
+      <a class="bento-tile" href="/main-sequence/calculator/?item=encoded-simulation-matrix" style="background:linear-gradient(145deg, #1a1628 0%, #0b101b 100%);">
         <div class="bento-tile-content">
           <span class="badge rarity-Epic" style="margin-bottom:0.35rem;">BOTTLENECK SOLVER</span>
-          <strong style="display:block; font-size:0.98rem; margin-bottom:0.25rem;">3-Tier Recursive BOM Engine</strong>
+          <strong style="display:block; font-size:0.98rem; margin-bottom:0.25rem;">Multi-Tier Recursive BOM Engine</strong>
           <span style="font-size:0.78rem; color:var(--text-dim);">
-            Instant raw-ore-to-endgame module breakdown with exact facility counts &amp; kW draw.
+            Instant raw-ore-to-endgame matrix breakdown with exact facility counts &amp; MW draw.
           </span>
         </div>
       </a>
@@ -143,9 +144,9 @@ const totalPins = gamesRegistry.reduce((s, g) => s + g.mapPins.length, 0);
         </div>
       </div>
 
-      <div class="table-scroll">
+      <div class="table-scroll" style="max-height:560px; overflow-y:auto;">
         <table>
-          <thead>
+          <thead style="position:sticky; top:0; z-index:2; background:#0c1018;">
             <tr>
               <th>Game</th>
               <th>Item / Module</th>
@@ -169,7 +170,18 @@ const totalPins = gamesRegistry.reduce((s, g) => s + g.mapPins.length, 0);
                 </td>
                 <td>
                   <span class="item-cell">
-                    <span class={`item-glyph rarity-${r.item.rarity}`}>{r.code}</span>
+                    {r.item.iconUrl ? (
+                      <img
+                        src={r.item.iconUrl}
+                        alt=""
+                        width="26"
+                        height="26"
+                        loading="lazy"
+                        style="width:26px;height:26px;object-fit:contain;border-radius:5px;border:1px solid var(--border);background:var(--surface-2);padding:2px;flex-shrink:0;"
+                      />
+                    ) : (
+                      <span class={`item-glyph rarity-${r.item.rarity}`}>{r.code}</span>
+                    )}
                     <strong>{r.item.name}</strong>
                   </span>
                 </td>
@@ -208,6 +220,11 @@ const totalPins = gamesRegistry.reduce((s, g) => s + g.mapPins.length, 0);
         </div>
         <ul class="changelog-list">
           <li>
+            <div class="changelog-date">2026-11-25 · UE5 CLIENT EXTRACT</div>
+            <strong style="display:block; margin:0.15rem 0;">Main Sequence Build #26097974 Full DB</strong>
+            <span style="color:var(--text-dim);">Extracted all 74 client items, 63 exact recipes, Enriched 3x plate yields, native icons &amp; MW reactor loads.</span>
+          </li>
+          <li>
             <div class="changelog-date">2026-11-24 · CONSOLE LAUNCH</div>
             <strong style="display:block; margin:0.15rem 0;">GTA VI Leonida Safe Codes &amp; Fence DB</strong>
             <span style="color:var(--text-dim);">Indexed 19 verified fixed safe/door codes, Yasmani &amp; Moses laundering chains, and Ch.4 vault payouts.</span>
@@ -216,11 +233,6 @@ const totalPins = gamesRegistry.reduce((s, g) => s + g.mapPins.length, 0);
             <div class="changelog-date">2026-11-23 · v1.0.2 INDEX</div>
             <strong style="display:block; margin:0.15rem 0;">Below the Stone 1.0 Smelting Tree</strong>
             <span style="color:var(--text-dim);">Added Layer-3 extraction drill pod markers, bronze ingot ratios &amp; delver armor recipes.</span>
-          </li>
-          <li>
-            <div class="changelog-date">2026-11-23 · EA BUILD</div>
-            <strong style="display:block; margin:0.15rem 0;">Main Sequence Orbital Power Load</strong>
-            <span style="color:var(--text-dim);">Wired recursive kW load solver for Arc Smelters, Wire Extruders &amp; Flux Regulators.</span>
           </li>
           <li>
             <div class="changelog-date">2026-11-23 · v1.0 RELEASE</div>

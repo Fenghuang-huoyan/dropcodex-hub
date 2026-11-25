@@ -93,11 +93,30 @@ const { game } = Astro.props;
         <tbody id="db-tbody">
           {game.items.map((it) => {
             const code = it.name.split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
+            const cycleLabel = it.craftTimeSec
+              ? `${it.outputQty && it.outputQty > 1 ? `${it.outputQty}x / ` : ''}${it.craftTimeSec}s`
+              : '—';
+            const powerLabel = it.powerKw
+              ? it.powerKw >= 1000
+                ? ` · ${+(it.powerKw / 1000).toFixed(1)} MW`
+                : ` · ${it.powerKw} kW`
+              : '';
             return (
               <tr data-hay={`${it.name} ${it.category} ${it.rarity} ${it.biomeOrSource}`.toLowerCase()}>
                 <td>
                   <span class="item-cell">
-                    <span class={`item-glyph rarity-${it.rarity}`}>{code}</span>
+                    {it.iconUrl ? (
+                      <img
+                        src={it.iconUrl}
+                        alt=""
+                        width="26"
+                        height="26"
+                        loading="lazy"
+                        style="width:26px;height:26px;object-fit:contain;border-radius:5px;border:1px solid var(--border);background:var(--surface-2);padding:2px;flex-shrink:0;"
+                      />
+                    ) : (
+                      <span class={`item-glyph rarity-${it.rarity}`}>{code}</span>
+                    )}
                     <strong>{it.name}</strong>
                   </span>
                 </td>
@@ -105,7 +124,7 @@ const { game } = Astro.props;
                 <td><span class={`badge rarity-${it.rarity}`}>{it.rarity}</span></td>
                 <td><strong>{it.baseValue}</strong></td>
                 <td style="color:var(--muted); font-size:0.82rem;">
-                  {it.craftTimeSec ? `${it.craftTimeSec}s` : '—'}{it.powerKw ? ` · ${it.powerKw} kW` : ''}
+                  {cycleLabel}{powerLabel}
                 </td>
                 <td>{it.biomeOrSource}</td>
               </tr>
