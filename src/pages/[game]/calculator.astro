@@ -50,7 +50,8 @@ const serializedItems = JSON.stringify(game.items);
         </label>
         <label>
           <span style="display:block; font-size:0.76rem; font-weight:700; color:var(--text-dim); margin-bottom:0.3rem; text-transform:uppercase;">Desired Output / Minute</span>
-          <input id="calc-rate" class="input" type="number" min="1" max="10000" step="1" value="30" />
+          <input id="calc-rate" class="input" type="number" inputmode="decimal" min="0.1" max="100000" step="1" value="30" />
+          <span id="calc-clamp-hint" style="display:none; margin-top:0.25rem; font-size:0.72rem; color:#fbbf24;"></span>
         </label>
       </div>
 
@@ -109,6 +110,16 @@ const serializedItems = JSON.stringify(game.items);
     const costEl = document.getElementById('out-cost');
     const netEl = document.getElementById('out-net');
     const powerEl = document.getElementById('out-power');
+    const clampHintEl = document.getElementById('calc-clamp-hint');
+
+    function esc(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
 
     // Deep-link support (?item=fusion-regulator)
     const urlItem = new URLSearchParams(window.location.search).get('item');
@@ -118,7 +129,23 @@ const serializedItems = JSON.stringify(game.items);
 
     function compute() {
       const targetId = targetSel.value;
-      const ratePerMin = Math.max(1, parseFloat(rateInput.value || '1') || 1);
+      const rawInput = parseFloat(rateInput.value);
+      const MIN_RATE = 0.1;
+      const MAX_RATE = 100000;
+      let ratePerMin = Number.isFinite(rawInput) ? rawInput : 1;
+      if (clampHintEl) {
+        if (!Number.isFinite(rawInput) || rawInput < MIN_RATE) {
+          ratePerMin = MIN_RATE;
+          clampHintEl.textContent = 'Minimum rate is 0.1 / min (calculating at 0.1/m).';
+          clampHintEl.style.display = rateInput.value === '' ? 'none' : 'block';
+        } else if (rawInput > MAX_RATE) {
+          ratePerMin = MAX_RATE;
+          clampHintEl.textContent = 'Capped at 100,000 / min to prevent numeric overflow.';
+          clampHintEl.style.display = 'block';
+        } else {
+          clampHintEl.style.display = 'none';
+        }
+      }
       const rootItem = itemMap.get(targetId);
       if (!rootItem) return;
 
@@ -130,10 +157,10 @@ const serializedItems = JSON.stringify(game.items);
 
       function renderGlyph(n) {
         if (n.iconUrl) {
-          return '<img src="' + n.iconUrl + '" alt="" width="26" height="26" decoding="async" style="width:26px;height:26px;object-fit:contain;border-radius:5px;border:1px solid var(--border);background:var(--surface-2);padding:2px;flex-shrink:0;" />';
+          return '<img src="' + esc(n.iconUrl) + '" alt="" width="26" height="26" decoding="async" style="width:26px;height:26px;object-fit:contain;border-radius:5px;border:1px solid var(--border);background:var(--surface-2);padding:2px;flex-shrink:0;" />';
         }
-        const code = n.name.split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
-        return '<span class="item-glyph rarity-' + n.rarity + '">' + code + '</span>';
+        const code = esc(n.name.split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase());
+        return '<span class="item-glyph rarity-' + esc(n.rarity) + '">' + code + '</span>';
       }
 
       function walk(id, neededPerMin, depth) {
@@ -181,8 +208,8 @@ const serializedItems = JSON.stringify(game.items);
           return (
             '<div class="flow-node">' +
             renderGlyph(n) +
-            '<div><strong style="display:block;font-size:0.8rem">' + n.name + '</strong>' +
-            '<span style="font-size:0.72rem;color:var(--text-dim)">' + req.toFixed(1) + '/m · ' + machines + 'x ' + n.biomeOrSource + '</span></div>' +
+            '<div><strong style="display:block;font-size:0.8rem">' + esc(n.name) + '</strong>' +
+            '<span style="font-size:0.72rem;color:var(--text-dim)">' + req.toFixed(1) + '/m · ' + machines + 'x ' + esc(n.biomeOrSource) + '</span></div>' +
             '</div>' + arrow
           );
         })
@@ -194,11 +221,11 @@ const serializedItems = JSON.stringify(game.items);
         const machines = ((reqRate / (node.outputQty || 1)) / (60 / (node.craftTimeSec || 4))).toFixed(1);
         const tr = document.createElement('tr');
         tr.innerHTML =
-          '<td><span class="item-cell">' + renderGlyph(node) + '<strong>' + node.name + '</strong></span></td>' +
-          '<td><span class="badge rarity-' + node.rarity + '">' + node.rarity + '</span></td>' +
+          '<td><span class="item-cell">' + renderGlyph(node) + '<strong>' + esc(node.name) + '</strong></span></td>' +
+          '<td><span class="badge rarity-' + esc(node.rarity) + '">' + esc(node.rarity) + '</span></td>' +
           '<td><strong>' + reqRate.toFixed(1) + '</strong> / min</td>' +
           '<td><strong>' + machines + 'x</strong></td>' +
-          '<td style="color:var(--text-dim)">' + node.biomeOrSource + '</td>';
+          '<td style="color:var(--text-dim)">' + esc(node.biomeOrSource) + '</td>';
         bomBody.appendChild(tr);
       });
     }

@@ -46,13 +46,18 @@ const catColor: Record<string, string> = {
         <button class="btn btn-xs btn-outline zoom-btn" type="button" data-z="1">1.0x</button>
         <button class="btn btn-xs btn-outline zoom-btn" type="button" data-z="1.35">1.35x</button>
         <button class="btn btn-xs btn-outline zoom-btn" type="button" data-z="1.75">1.75x</button>
-        <label class="btn btn-xs btn-outline" style="cursor:pointer;">
+        <button id="map-export-btn" class="btn btn-xs btn-outline" type="button" title="Download current checklist progress as JSON">
+          Export .JSON
+        </button>
+        <label class="btn btn-xs btn-outline" style="cursor:pointer;" title="Restore progress from an exported JSON file">
           Import .JSON
-          <input id="save-json-input" type="file" accept=".json" style="display:none;" />
+          <input id="save-json-input" type="file" accept=".json,application/json" style="display:none;" />
         </label>
         <button id="map-reset-btn" class="btn btn-xs btn-outline" type="button">Reset</button>
       </div>
     </div>
+
+    <div id="map-io-status" role="status" aria-live="polite" style="display:none; padding:0.45rem 1rem; font-size:0.78rem; border-bottom:1px solid var(--border); background:var(--surface-2);"></div>
 
     <div class="panel-body">
       <div class="map-workspace">
@@ -113,19 +118,35 @@ const catColor: Record<string, string> = {
 
   <MonetizationBar game={game} />
 
-  <script is:inline define:vars={{ storageKey, pinsJson }}>
+  <script is:inline define:vars={{ storageKey, pinsJson, gameSlug: game.slug }}>
     const pins = JSON.parse(pinsJson);
+    const validPinIds = new Set(pins.map((p) => p.id));
     let foundSet = new Set();
     try {
       const raw = localStorage.getItem(storageKey);
-      if (raw) foundSet = new Set(JSON.parse(raw));
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          parsed.forEach((id) => {
+            if (typeof id === 'string' && validPinIds.has(id)) foundSet.add(id);
+          });
+        }
+      }
     } catch {}
 
     const badge = document.getElementById('map-progress-badge');
     const bar = document.getElementById('map-progress-bar');
     const zoomLayer = document.getElementById('map-zoom-layer');
+    const ioStatus = document.getElementById('map-io-status');
     const checks = Array.from(document.querySelectorAll('.pin-check'));
     const pinBtns = Array.from(document.querySelectorAll('.map-pin-btn'));
+
+    function showNotice(msg, isError = false) {
+      if (!ioStatus) return;
+      ioStatus.textContent = msg;
+      ioStatus.style.display = 'block';
+      ioStatus.style.color = isError ? '#fda4af' : 'var(--emerald)';
+    }
 
     function syncUI() {
       checks.forEach((ch) => {
@@ -171,20 +192,63 @@ const catColor: Record<string, string> = {
       });
     });
 
+    document.getElementById('map-export-btn')?.addEventListener('click', () => {
+      const payload = {
+        game: gameSlug,
+        exportedAt: new Date().toISOString(),
+        completedPins: Array.from(foundSet),
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'dropcodex-' + gameSlug + '-map-progress.json';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      showNotice('Exported ' + foundSet.size + ' / ' + pins.length + ' checked nodes to JSON.');
+    });
+
     document.getElementById('map-reset-btn')?.addEventListener('click', () => {
       foundSet.clear();
       syncUI();
+      showNotice('Map completion progress cleared.');
     });
 
     document.getElementById('save-json-input')?.addEventListener('change', async (e) => {
       const file = e.target.files && e.target.files[0];
       if (!file) return;
+      if (file.size > 1024 * 1024) {
+        showNotice('File too large (max 1 MB JSON).', true);
+        e.target.value = '';
+        return;
+      }
       try {
         const parsed = JSON.parse(await file.text());
-        const arr = Array.isArray(parsed) ? parsed : (parsed.completedPins || []);
-        arr.forEach((id) => { if (typeof id === 'string') foundSet.add(id); });
+        const arr = Array.isArray(parsed) ? parsed : (parsed && Array.isArray(parsed.completedPins) ? parsed.completedPins : null);
+        if (!arr) {
+          showNotice('Invalid JSON format — expected { "completedPins": [...] }.', true);
+          e.target.value = '';
+          return;
+        }
+        let matched = 0;
+        arr.forEach((id) => {
+          if (typeof id === 'string' && validPinIds.has(id)) {
+            foundSet.add(id);
+            matched++;
+          }
+        });
         syncUI();
-      } catch {}
+        if (matched === 0 && arr.length > 0) {
+          showNotice('No matching node IDs found for this game map.', true);
+        } else {
+          showNotice('Imported ' + matched + ' valid node(s) (' + foundSet.size + ' / ' + pins.length + ' complete).');
+        }
+      } catch {
+        showNotice('Could not parse file — please select a valid DropCodex .json export.', true);
+      }
+      e.target.value = '';
     });
 
     syncUI();
