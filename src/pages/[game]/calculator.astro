@@ -19,6 +19,8 @@ const { game } = Astro.props;
 const seo = game.seo;
 const isEconomyStyle = game.slug === 'marvel-rivals' || game.slug === 'gta-6' || game.slug === 'we-march-as-one';
 const unitSuffix = game.slug === 'gta-6' ? ' USD' : game.slug === 'marvel-rivals' ? ' Units' : ' pts';
+const mwUnitLabel = isEconomyStyle ? '' : ' MW · ';
+const kwUnitLabel = isEconomyStyle ? '' : ' kW · ';
 
 const craftableItems = [...game.items.filter((i) => i.recipe && i.recipe.length > 0)].reverse();
 const selectableItems = craftableItems.length > 0 ? craftableItems : game.items;
@@ -285,7 +287,7 @@ const schemas = [
     </section>
   )}
 
-  <script is:inline define:vars={{ serializedItems, unitSuffix, isEconomyStyle }}>
+  <script is:inline define:vars={{ serializedItems, unitSuffix, isEconomyStyle, mwUnitLabel, kwUnitLabel }}>
     const items = JSON.parse(serializedItems);
     const itemMap = new Map(items.map((i) => [i.id, i]));
     const targetSel = document.getElementById('calc-target-item');
@@ -389,10 +391,10 @@ const schemas = [
       grossEl.textContent = gross.toLocaleString('en-US') + unitSuffix;
       costEl.textContent = costRounded.toLocaleString('en-US') + unitSuffix;
       netEl.textContent = (net >= 0 ? '+' : '') + net.toLocaleString('en-US') + unitSuffix;
-      powerEl.textContent = totalPowerKw >= 1000
-        ? (totalPowerKw / 1000).toFixed(1) + ' MW · ' + totalMachines.toFixed(1) + 'x'
-        : totalPowerKw > 0
-          ? Math.ceil(totalPowerKw) + ' kW · ' + totalMachines.toFixed(1) + 'x'
+      powerEl.textContent = !isEconomyStyle && totalPowerKw >= 1000
+        ? (totalPowerKw / 1000).toFixed(1) + mwUnitLabel + totalMachines.toFixed(1) + 'x'
+        : !isEconomyStyle && totalPowerKw > 0
+          ? Math.ceil(totalPowerKw) + kwUnitLabel + totalMachines.toFixed(1) + 'x'
           : totalMachines.toFixed(1) + (isEconomyStyle ? 'x steps' : 'x stations');
 
       const ordered = Array.from(totals.entries()).sort((a, b) => (depths.get(b[0]) || 0) - (depths.get(a[0]) || 0));
