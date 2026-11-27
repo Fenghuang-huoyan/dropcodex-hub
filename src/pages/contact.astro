@@ -9,6 +9,9 @@ import { hubConfig } from '../config/hub.config.mjs';
     <p class="subtitle">Report recipe updates, patch changes, or compliance inquiries.</p>
   </section>
   <section class="card" style="margin-top:1.25rem;">
-    <p>For data corrections, copyright questions, or partnership inquiries regarding <strong>{hubConfig.domain}</strong>, write to: <code>{hubConfig.editorialEmail}</code>.</p>
+    <p>
+      For data corrections, patch formula updates, copyright questions, or partnership inquiries regarding <strong>{hubConfig.domain}</strong>, email our editorial desk directly at:
+      <a href={`mailto:${hubConfig.editorialEmail}`} style="font-weight:700; color:var(--accent-bright); margin-left:0.25rem;">{hubConfig.editorialEmail}</a>.
+    </p>
   </section>
 </HubLayout>
