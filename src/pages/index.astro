@@ -68,10 +68,28 @@ const totalItems = matrixRows.length;
 const totalPins = gamesRegistry.reduce((s, g) => s + g.mapPins.length, 0);
 const recentModules = [...gamesRegistry].reverse().slice(0, 4);
 const tickerHeadline = recentModules.slice(0, 3).map((g) => `${g.title} (${g.engine})`).join(' · ');
+
+const homeSchemas = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: hubConfig.brandName,
+    url: `${hubConfig.siteUrl}/`,
+    description: hubConfig.tagline,
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: hubConfig.brandName,
+    url: `${hubConfig.siteUrl}/`,
+    email: hubConfig.editorialEmail,
+  },
+];
 ---
 <HubLayout
-  title={`${hubConfig.brandName} — Live Crafting Calculators, Tactical Maps & Item Database`}
+  title={`${hubConfig.brandName} — Live Game Calculators, Tactical Maps & Verified Databases`}
   description={hubConfig.tagline}
+  jsonLd={homeSchemas}
 >
   <!-- Compact Live Patch Status Bar (Data-Driven from gamesRegistry) -->
   <div class="live-ticker">

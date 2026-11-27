@@ -16,67 +16,227 @@ interface Props {
   game: GameModule;
 }
 const { game } = Astro.props;
+const seo = game.seo;
+const isEconomyStyle = game.slug === 'marvel-rivals' || game.slug === 'gta-6' || game.slug === 'we-march-as-one';
+const unitSuffix = game.slug === 'gta-6' ? ' USD' : game.slug === 'marvel-rivals' ? ' Units' : ' pts';
+
 const craftableItems = [...game.items.filter((i) => i.recipe && i.recipe.length > 0)].reverse();
+const selectableItems = craftableItems.length > 0 ? craftableItems : game.items;
+const defaultItem = selectableItems[0];
+const itemMapServer = new Map(game.items.map((i) => [i.id, i]));
+
+// Pre-compute SSR default breakdown so crawlers & no-JS visitors see real numbers immediately
+const defaultRate = isEconomyStyle ? 1 : 30;
+const ssrTotals = new Map<string, number>();
+let ssrRawCost = 0;
+let ssrPowerKw = 0;
+let ssrMachines = 0;
+
+function walkSsr(id: string, needed: number, depth: number) {
+  if (depth > 16) return;
+  const node = itemMapServer.get(id);
+  if (!node) return;
+  ssrTotals.set(id, (ssrTotals.get(id) || 0) + needed);
+  const craftSec = node.craftTimeSec || 4;
+  const outQty = node.outputQty || 1;
+  const batches = needed / outQty;
+  const mac = batches / (60 / craftSec);
+  ssrMachines += mac;
+  ssrPowerKw += mac * (node.powerKw || 0);
+  if (node.recipe && node.recipe.length > 0) {
+    node.recipe.forEach((ing) => walkSsr(ing.itemId, batches * ing.qty, depth + 1));
+  } else {
+    ssrRawCost += needed * (node.baseValue || 0);
+  }
+}
+if (defaultItem) {
+  walkSsr(defaultItem.id, defaultRate, 0);
+}
+const ssrGross = Math.round(defaultRate * (defaultItem?.baseValue || 0));
+const ssrCostRounded = Math.round(ssrRawCost);
+const ssrNet = ssrGross - ssrCostRounded;
+const ssrPowerText = ssrPowerKw >= 1000
+  ? `${(ssrPowerKw / 1000).toFixed(1)} MW · ${ssrMachines.toFixed(1)}x`
+  : ssrPowerKw > 0
+    ? `${Math.ceil(ssrPowerKw)} kW · ${ssrMachines.toFixed(1)}x`
+    : `${ssrMachines.toFixed(1)}x steps`;
+
 const serializedItems = JSON.stringify(game.items);
+const pageTitle = seo?.calcTitle ?? `${game.title} Calculator & Planner — ${hubConfig.brandName}`;
+const pageDesc = seo?.calcDesc ?? game.summary;
+const headingText = seo?.calcHeading ?? `${game.title} — Interactive Planner`;
+
+const schemas = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: hubConfig.brandName, item: `${hubConfig.siteUrl}/` },
+      { '@type': 'ListItem', position: 2, name: game.title, item: `${hubConfig.siteUrl}/${game.slug}/` },
+      { '@type': 'ListItem', position: 3, name: headingText, item: `${hubConfig.siteUrl}/${game.slug}/calculator/` },
+    ],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: headingText,
+    url: `${hubConfig.siteUrl}/${game.slug}/calculator/`,
+    applicationCategory: 'GameApplication',
+    operatingSystem: 'All',
+    description: pageDesc,
+  },
+];
 ---
 <HubLayout
-  title={`${game.title} Crafting, Production Ratio & Profit Calculator — ${hubConfig.brandName}`}
-  description={`Calculate exact raw resource requirements, smelter ratios, power load, and profit margin for ${game.title}.`}
+  title={pageTitle}
+  description={pageDesc}
   ogImage={game.art.header}
+  jsonLd={schemas}
 >
-  <GameHero game={game} active="calculator" heading={`${game.title} — Production & Ratio Planner`} />
+  <GameHero game={game} active="calculator" heading={headingText} subtitle={game.summary} />
 
-  <!-- Calculator Workbench Immediately Above the Fold -->
+  {game.slug === 'we-march-as-one' && (
+    <div class="card" style="margin-bottom:1rem; padding:0.85rem 1.1rem; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:0.75rem; border-left:3px solid var(--accent-bright);">
+      <div style="font-size:0.88rem; line-height:1.5;">
+        <strong>Looking for the full 25-Wave Campaign &amp; 5-Armor Counter Simulator?</strong>
+        <span style="color:var(--text-dim); margin-left:0.35rem;">Test exact troop matchups against DemoLevels 1–25 with The King &amp; Bastion auras on our dedicated companion wiki.</span>
+      </div>
+      <a class="btn btn-xs btn-primary" href="https://wemarchasone.wiki/calculator" target="_blank" rel="noopener">Open 25-Wave Simulator ↗</a>
+    </div>
+  )}
+
+  {game.slug === 'marvel-rivals' && (
+    <div class="panel" style="margin-bottom:1.15rem;">
+      <div class="panel-head">
+        <div>
+          <h2 class="panel-title">Marvel Rivals — Cheapest USD Lattice Pack Optimizer</h2>
+          <div style="font-size:0.75rem; color:var(--text-dim); margin-top:0.15rem;">Official US Store Tiers ($0.99 / 100 → $99.99 / 11,680) · Verified Nov 2026</div>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:0.35rem;">
+          <button class="btn btn-xs btn-outline mr-preset" type="button" data-mr-need="990" data-mr-have="0">990 Luxury Pass</button>
+          <button class="btn btn-xs btn-outline mr-preset" type="button" data-mr-need="1600" data-mr-have="0">1,600 Epic Skin</button>
+          <button class="btn btn-xs btn-outline mr-preset" type="button" data-mr-need="2200" data-mr-have="20">2,200 Legendary (-20 Free)</button>
+          <button class="btn btn-xs btn-outline mr-preset" type="button" data-mr-need="4400" data-mr-have="0">2x Legendary (4,400)</button>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap:0.85rem; margin-bottom:0.95rem;">
+          <label>
+            <span style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-dim); margin-bottom:0.3rem; text-transform:uppercase;">Target Units / Lattice Needed</span>
+            <input id="mr-need" class="input" type="number" min="10" max="100000" step="10" value="2200" />
+          </label>
+          <label>
+            <span style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-dim); margin-bottom:0.3rem; text-transform:uppercase;">Current Lattice + Free Units Owned</span>
+            <input id="mr-have" class="input" type="number" min="0" max="100000" step="10" value="20" />
+          </label>
+        </div>
+        <div class="stat-strip" style="margin-bottom:0.85rem;">
+          <div class="stat-pill">
+            <span>Net Lattice Shortfall</span>
+            <strong id="mr-shortfall">2,180 Lattice</strong>
+          </div>
+          <div class="stat-pill">
+            <span>Cheapest Official Store Combo</span>
+            <strong id="mr-combo" style="color:var(--sky);">1× 2,180 Pack</strong>
+          </div>
+          <div class="stat-pill">
+            <span>Official Retail USD Total</span>
+            <strong id="mr-usd" style="color:var(--emerald);">$19.99 USD</strong>
+          </div>
+          <div class="stat-pill">
+            <span>Leftover Lattice After Unlock</span>
+            <strong id="mr-leftover">+0 Lattice</strong>
+          </div>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:0.75rem; padding:0.75rem 0.95rem; border-radius:8px; background:var(--surface-2); border:1px solid var(--border);">
+          <div style="font-size:0.84rem; color:var(--text-dim);">
+            <strong style="color:var(--text);">UID Direct Recharge Option:</strong> Compare live regional bundle pricing against the <strong id="mr-usd-inline" style="color:var(--text);">$19.99 USD</strong> in-game retail total using only your numeric Marvel Rivals UID.
+          </div>
+          {game.affiliateLinks?.lootbarUrl && (
+            <a
+              class="btn btn-primary"
+              href={game.affiliateLinks.lootbarUrl}
+              target="_blank"
+              rel="sponsored noopener"
+              data-aff-partner="lootbar"
+              data-aff-placement="mr-lattice-optimizer"
+            >
+              Check Live UID Lattice Price on LootBar →
+            </a>
+          )}
+        </div>
+      </div>
+    </div>
+  )}
+
   <div class="panel">
     <div class="panel-head">
-      <h2 class="panel-title">Target Production Parameters</h2>
-      <div style="display:flex; gap:0.4rem;">
-        <button class="btn btn-xs btn-outline rate-preset" type="button" data-rate="15">15/m</button>
-        <button class="btn btn-xs btn-outline rate-preset" type="button" data-rate="30">30/m</button>
-        <button class="btn btn-xs btn-outline rate-preset" type="button" data-rate="60">60/m</button>
-        <button class="btn btn-xs btn-outline rate-preset" type="button" data-rate="120">120/m</button>
+      <div>
+        <h2 class="panel-title">{isEconomyStyle ? 'Target Bundle / Loadout Parameters' : 'Target Production Parameters'}</h2>
+        <div style="font-size:0.73rem; color:var(--text-dim); margin-top:0.15rem;">Data source: {game.statusBadge} · Verified {game.releaseLabel}</div>
+      </div>
+      <div style="display:flex; flex-wrap:wrap; gap:0.4rem; align-items:center;">
+        {isEconomyStyle ? (
+          <>
+            <button class="btn btn-xs btn-outline rate-preset" type="button" data-rate="1">1x</button>
+            <button class="btn btn-xs btn-outline rate-preset" type="button" data-rate="2">2x</button>
+            <button class="btn btn-xs btn-outline rate-preset" type="button" data-rate="5">5x</button>
+            <button class="btn btn-xs btn-outline rate-preset" type="button" data-rate="10">10x</button>
+          </>
+        ) : (
+          <>
+            <button class="btn btn-xs btn-outline rate-preset" type="button" data-rate="15">15/m</button>
+            <button class="btn btn-xs btn-outline rate-preset" type="button" data-rate="30">30/m</button>
+            <button class="btn btn-xs btn-outline rate-preset" type="button" data-rate="60">60/m</button>
+            <button class="btn btn-xs btn-outline rate-preset" type="button" data-rate="120">120/m</button>
+          </>
+        )}
+        <button id="calc-copy-link" class="btn btn-xs btn-outline" type="button" title="Copy shareable link with current parameters">Copy Share Link</button>
       </div>
     </div>
 
     <div class="panel-body">
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap:0.85rem; margin-bottom:1rem;">
         <label>
-          <span style="display:block; font-size:0.76rem; font-weight:700; color:var(--text-dim); margin-bottom:0.3rem; text-transform:uppercase;">Target Output Module / Item</span>
+          <span style="display:block; font-size:0.76rem; font-weight:700; color:var(--text-dim); margin-bottom:0.3rem; text-transform:uppercase;">
+            {isEconomyStyle ? 'Target Unlock / Bundle / Operation' : 'Target Output Module / Item'}
+          </span>
           <select id="calc-target-item" class="input">
-            {(craftableItems.length > 0 ? craftableItems : game.items).map((it) => (
+            {selectableItems.map((it) => (
               <option value={it.id}>{it.name} ({it.rarity} · Val {it.baseValue})</option>
             ))}
           </select>
         </label>
         <label>
-          <span style="display:block; font-size:0.76rem; font-weight:700; color:var(--text-dim); margin-bottom:0.3rem; text-transform:uppercase;">Desired Output / Minute</span>
-          <input id="calc-rate" class="input" type="number" inputmode="decimal" min="0.1" max="100000" step="1" value="30" />
+          <span style="display:block; font-size:0.76rem; font-weight:700; color:var(--text-dim); margin-bottom:0.3rem; text-transform:uppercase;">
+            {isEconomyStyle ? 'Target Quantity / Runs' : 'Desired Output / Minute'}
+          </span>
+          <input id="calc-rate" class="input" type="number" inputmode="decimal" min="0.1" max="100000" step="any" value={defaultRate} />
           <span id="calc-clamp-hint" style="display:none; margin-top:0.25rem; font-size:0.72rem; color:#fbbf24;"></span>
         </label>
       </div>
 
       <div class="stat-strip">
         <div class="stat-pill">
-          <span>Gross Output / Min</span>
-          <strong id="out-gross" style="color:var(--emerald);">—</strong>
+          <span>{isEconomyStyle ? 'Total Target Value' : 'Gross Output / Min'}</span>
+          <strong id="out-gross" style="color:var(--emerald);">{ssrGross.toLocaleString('en-US')}{unitSuffix}</strong>
         </div>
         <div class="stat-pill">
-          <span>Raw Ore Cost / Min</span>
-          <strong id="out-cost">—</strong>
+          <span>{isEconomyStyle ? 'Required Input Value' : 'Base Input Cost / Min'}</span>
+          <strong id="out-cost">{ssrCostRounded.toLocaleString('en-US')}{unitSuffix}</strong>
         </div>
         <div class="stat-pill">
-          <span>Net Value Added / Min</span>
-          <strong id="out-net" style="color:var(--accent-bright);">—</strong>
+          <span>{isEconomyStyle ? 'Net Bonus / Margin' : 'Net Value Added / Min'}</span>
+          <strong id="out-net" style="color:var(--accent-bright);">{ssrNet >= 0 ? '+' : ''}{ssrNet.toLocaleString('en-US')}{unitSuffix}</strong>
         </div>
         <div class="stat-pill">
-          <span>Total Machines &amp; Power</span>
-          <strong id="out-power" style="color:var(--sky);">—</strong>
+          <span>{isEconomyStyle ? 'Breakdown Steps' : 'Required Throughput Scale'}</span>
+          <strong id="out-power" style="color:var(--sky);">{ssrPowerText}</strong>
         </div>
       </div>
 
-      <!-- SCIM-Style Visual Production Chain Flow -->
       <div style="font-size:0.76rem; font-weight:700; color:var(--text-dim); text-transform:uppercase; margin-bottom:0.35rem;">
-        Visual Production Chain Flow
+        Step-by-Step Breakdown Flow
       </div>
       <div id="calc-flow-chain" class="flow-chain" aria-live="polite"></div>
 
@@ -84,14 +244,28 @@ const serializedItems = JSON.stringify(game.items);
         <table>
           <thead>
             <tr>
-              <th>Stage / Material</th>
+              <th>Stage / Entry</th>
               <th>Rarity</th>
-              <th>Throughput / Min</th>
-              <th>Facilities Required</th>
-              <th>Facility / Source</th>
+              <th>{isEconomyStyle ? 'Required Qty' : 'Throughput / Min'}</th>
+              <th>{isEconomyStyle ? 'Batches' : 'Scale Factor'}</th>
+              <th>Source / Requirement</th>
             </tr>
           </thead>
-          <tbody id="calc-bom-rows"></tbody>
+          <tbody id="calc-bom-rows">
+            {Array.from(ssrTotals.entries()).map(([id, reqRate]) => {
+              const node = itemMapServer.get(id)!;
+              const batches = ((reqRate / (node.outputQty || 1)) / (60 / (node.craftTimeSec || 4))).toFixed(1);
+              return (
+                <tr>
+                  <td><strong>{node.name}</strong></td>
+                  <td><span class={`badge rarity-${node.rarity}`}>{node.rarity}</span></td>
+                  <td><strong>{reqRate.toFixed(1)}</strong></td>
+                  <td><strong>{batches}x</strong></td>
+                  <td style="color:var(--text-dim)">{node.biomeOrSource}</td>
+                </tr>
+              );
+            })}
+          </tbody>
         </table>
       </div>
     </div>
@@ -99,7 +273,19 @@ const serializedItems = JSON.stringify(game.items);
 
   <MonetizationBar game={game} />
 
-  <script is:inline define:vars={{ serializedItems }}>
+  {game.introParagraphs && game.introParagraphs.length > 0 && (
+    <section class="card" style="margin-top:1.25rem;">
+      <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:0.5rem; margin-bottom:0.6rem;">
+        <h2 style="margin:0; font-size:1.08rem;">How {game.title} Calculations &amp; Breakpoints Work</h2>
+        <span class="badge">{game.statusBadge} · Verified {game.releaseLabel}</span>
+      </div>
+      {game.introParagraphs.map((p) => (
+        <p style="margin:0 0 0.75rem; font-size:0.88rem; color:var(--text-dim); line-height:1.65;">{p}</p>
+      ))}
+    </section>
+  )}
+
+  <script is:inline define:vars={{ serializedItems, unitSuffix, isEconomyStyle }}>
     const items = JSON.parse(serializedItems);
     const itemMap = new Map(items.map((i) => [i.id, i]));
     const targetSel = document.getElementById('calc-target-item');
@@ -121,10 +307,14 @@ const serializedItems = JSON.stringify(game.items);
         .replace(/'/g, '&#39;');
     }
 
-    // Deep-link support (?item=fusion-regulator)
-    const urlItem = new URLSearchParams(window.location.search).get('item');
+    const params = new URLSearchParams(window.location.search);
+    const urlItem = params.get('item');
+    const urlRate = params.get('rate');
     if (urlItem && itemMap.has(urlItem) && targetSel) {
       targetSel.value = urlItem;
+    }
+    if (urlRate && rateInput && Number.isFinite(parseFloat(urlRate))) {
+      rateInput.value = urlRate;
     }
 
     function compute() {
@@ -136,11 +326,11 @@ const serializedItems = JSON.stringify(game.items);
       if (clampHintEl) {
         if (!Number.isFinite(rawInput) || rawInput < MIN_RATE) {
           ratePerMin = MIN_RATE;
-          clampHintEl.textContent = 'Minimum rate is 0.1 / min (calculating at 0.1/m).';
+          clampHintEl.textContent = 'Minimum quantity is 0.1 (calculating at 0.1).';
           clampHintEl.style.display = rateInput.value === '' ? 'none' : 'block';
         } else if (rawInput > MAX_RATE) {
           ratePerMin = MAX_RATE;
-          clampHintEl.textContent = 'Capped at 100,000 / min to prevent numeric overflow.';
+          clampHintEl.textContent = 'Capped at 100,000 to prevent numeric overflow.';
           clampHintEl.style.display = 'block';
         } else {
           clampHintEl.style.display = 'none';
@@ -148,6 +338,14 @@ const serializedItems = JSON.stringify(game.items);
       }
       const rootItem = itemMap.get(targetId);
       if (!rootItem) return;
+
+      // Sync shareable URL query without page reload
+      try {
+        const nextUrl = new URL(window.location.href);
+        nextUrl.searchParams.set('item', targetId);
+        nextUrl.searchParams.set('rate', String(ratePerMin));
+        window.history.replaceState({}, '', nextUrl.toString());
+      } catch {}
 
       const totals = new Map();
       const depths = new Map();
@@ -188,17 +386,17 @@ const serializedItems = JSON.stringify(game.items);
       const costRounded = Math.round(rawCost);
       const net = gross - costRounded;
 
-      grossEl.textContent = gross.toLocaleString('en-US') + ' pts';
-      costEl.textContent = costRounded.toLocaleString('en-US') + ' pts';
-      netEl.textContent = (net >= 0 ? '+' : '') + net.toLocaleString('en-US') + ' pts';
+      grossEl.textContent = gross.toLocaleString('en-US') + unitSuffix;
+      costEl.textContent = costRounded.toLocaleString('en-US') + unitSuffix;
+      netEl.textContent = (net >= 0 ? '+' : '') + net.toLocaleString('en-US') + unitSuffix;
       powerEl.textContent = totalPowerKw >= 1000
         ? (totalPowerKw / 1000).toFixed(1) + ' MW · ' + totalMachines.toFixed(1) + 'x'
         : totalPowerKw > 0
           ? Math.ceil(totalPowerKw) + ' kW · ' + totalMachines.toFixed(1) + 'x'
-          : totalMachines.toFixed(1) + 'x stations';
+          : totalMachines.toFixed(1) + (isEconomyStyle ? 'x steps' : 'x stations');
 
-      // Sort from raw inputs (highest depth) -> final output (depth 0) for visual flowchart
       const ordered = Array.from(totals.entries()).sort((a, b) => (depths.get(b[0]) || 0) - (depths.get(a[0]) || 0));
+      const rateLabel = isEconomyStyle ? ' qty · ' : '/m · ';
 
       flowEl.innerHTML = ordered
         .map(([id, req], idx) => {
@@ -209,7 +407,7 @@ const serializedItems = JSON.stringify(game.items);
             '<div class="flow-node">' +
             renderGlyph(n) +
             '<div><strong style="display:block;font-size:0.8rem">' + esc(n.name) + '</strong>' +
-            '<span style="font-size:0.72rem;color:var(--text-dim)">' + req.toFixed(1) + '/m · ' + machines + 'x ' + esc(n.biomeOrSource) + '</span></div>' +
+            '<span style="font-size:0.72rem;color:var(--text-dim)">' + req.toFixed(1) + rateLabel + machines + 'x ' + esc(n.biomeOrSource) + '</span></div>' +
             '</div>' + arrow
           );
         })
@@ -223,7 +421,7 @@ const serializedItems = JSON.stringify(game.items);
         tr.innerHTML =
           '<td><span class="item-cell">' + renderGlyph(node) + '<strong>' + esc(node.name) + '</strong></span></td>' +
           '<td><span class="badge rarity-' + esc(node.rarity) + '">' + esc(node.rarity) + '</span></td>' +
-          '<td><strong>' + reqRate.toFixed(1) + '</strong> / min</td>' +
+          '<td><strong>' + reqRate.toFixed(1) + '</strong>' + (isEconomyStyle ? '' : ' / min') + '</td>' +
           '<td><strong>' + machines + 'x</strong></td>' +
           '<td style="color:var(--text-dim)">' + esc(node.biomeOrSource) + '</td>';
         bomBody.appendChild(tr);
@@ -232,12 +430,104 @@ const serializedItems = JSON.stringify(game.items);
 
     document.querySelectorAll('.rate-preset').forEach((btn) => {
       btn.addEventListener('click', () => {
-        rateInput.value = btn.getAttribute('data-rate') || '30';
+        rateInput.value = btn.getAttribute('data-rate') || '1';
         compute();
       });
     });
     targetSel.addEventListener('change', compute);
     rateInput.addEventListener('input', compute);
     compute();
+
+    const copyBtn = document.getElementById('calc-copy-link');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', () => {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(window.location.href).then(() => {
+            copyBtn.textContent = 'Copied!';
+            setTimeout(() => { copyBtn.textContent = 'Copy Share Link'; }, 1800);
+          }).catch(() => {});
+        }
+      });
+    }
+
+    // Marvel Rivals dynamic programming USD Lattice Pack Optimizer
+    const mrNeedEl = document.getElementById('mr-need');
+    const mrHaveEl = document.getElementById('mr-have');
+    if (mrNeedEl && mrHaveEl) {
+      const PACKS = [
+        { lat: 11680, cents: 9999, label: '11,680 Pack' },
+        { lat: 5680, cents: 4999, label: '5,680 Pack' },
+        { lat: 2180, cents: 1999, label: '2,180 Pack' },
+        { lat: 1000, cents: 999, label: '1,000 Pack' },
+        { lat: 500, cents: 499, label: '500 Pack' },
+        { lat: 100, cents: 99, label: '100 Pack' },
+      ];
+      function solvePacks(shortfall) {
+        if (shortfall <= 0) return { cents: 0, totalLat: 0, text: '0 Packs Needed' };
+        let prefix11680 = 0;
+        let rem = shortfall;
+        if (rem > 25000) {
+          prefix11680 = Math.floor((rem - 15000) / 11680);
+          rem -= prefix11680 * 11680;
+        }
+        const maxCap = rem + 11680;
+        const dp = new Array(maxCap + 1).fill(Infinity);
+        const choice = new Array(maxCap + 1).fill(-1);
+        dp[0] = 0;
+        for (let v = 0; v <= rem; v++) {
+          if (dp[v] === Infinity) continue;
+          for (let i = 0; i < PACKS.length; i++) {
+            const nv = Math.min(maxCap, v + PACKS[i].lat);
+            if (dp[v] + PACKS[i].cents < dp[nv]) {
+              dp[nv] = dp[v] + PACKS[i].cents;
+              choice[nv] = v * 10 + i;
+            }
+          }
+        }
+        let bestV = rem;
+        for (let v = rem; v <= maxCap; v++) {
+          if (dp[v] < dp[bestV]) bestV = v;
+        }
+        const counts = [0, 0, 0, 0, 0, 0];
+        let cur = bestV;
+        let guard = 0;
+        while (cur > 0 && choice[cur] !== -1 && guard++ < 500) {
+          const idx = choice[cur] % 10;
+          const prev = Math.floor(choice[cur] / 10);
+          counts[idx]++;
+          cur = prev;
+        }
+        counts[0] += prefix11680;
+        const totalLat = counts.reduce((s, c, i) => s + c * PACKS[i].lat, 0);
+        const totalCents = counts.reduce((s, c, i) => s + c * PACKS[i].cents, 0);
+        const parts = [];
+        counts.forEach((c, i) => { if (c > 0) parts.push(c + '× ' + PACKS[i].label); });
+        return { cents: totalCents, totalLat, text: parts.join(' + ') || '0 Packs' };
+      }
+      function updateMr() {
+        const need = Math.max(0, Math.min(100000, Math.round(parseFloat(mrNeedEl.value) || 0)));
+        const have = Math.max(0, Math.min(100000, Math.round(parseFloat(mrHaveEl.value) || 0)));
+        const shortfall = Math.max(0, need - have);
+        const best = solvePacks(shortfall);
+        const usdStr = '$' + (best.cents / 100).toFixed(2) + ' USD';
+        const left = Math.max(0, best.totalLat - shortfall);
+        document.getElementById('mr-shortfall').textContent = shortfall.toLocaleString('en-US') + ' Lattice';
+        document.getElementById('mr-combo').textContent = best.text;
+        document.getElementById('mr-usd').textContent = usdStr;
+        const inlineUsd = document.getElementById('mr-usd-inline');
+        if (inlineUsd) inlineUsd.textContent = usdStr;
+        document.getElementById('mr-leftover').textContent = '+' + left.toLocaleString('en-US') + ' Lattice';
+      }
+      document.querySelectorAll('.mr-preset').forEach((b) => {
+        b.addEventListener('click', () => {
+          mrNeedEl.value = b.getAttribute('data-mr-need') || '2200';
+          mrHaveEl.value = b.getAttribute('data-mr-have') || '0';
+          updateMr();
+        });
+      });
+      mrNeedEl.addEventListener('input', updateMr);
+      mrHaveEl.addEventListener('input', updateMr);
+      updateMr();
+    }
   </script>
 </HubLayout>

@@ -9,8 +9,11 @@ interface Props {
   title: string;
   description: string;
   ogImage?: string;
+  noindex?: boolean;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 }
-const { title, description, ogImage = '/images/games/main-sequence/header.jpg' } = Astro.props;
+const { title, description, ogImage = '/images/games/main-sequence/header.jpg', noindex = false, jsonLd } = Astro.props;
+const schemas = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
 const pathname = Astro.url.pathname;
 const canonical = new URL(pathname, hubConfig.siteUrl).href;
 const ogImageUrl = new URL(ogImage, hubConfig.siteUrl).href;
@@ -67,8 +70,12 @@ const omniJson = JSON.stringify(omniIndex);
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    {schemas.map((s) => (
+      <script type="application/ld+json" set:html={JSON.stringify(s)} />
+    ))}
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
@@ -223,6 +230,27 @@ const omniJson = JSON.stringify(omniIndex);
           box?.focus();
         } else if (e.key === 'Escape') {
           drop?.classList.remove('open');
+        }
+      });
+
+      // Delegated GA4 affiliate click attribution tracker
+      document.addEventListener('click', (e) => {
+        const a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
+        if (!a) return;
+        const href = a.href || '';
+        let partner = a.getAttribute('data-aff-partner') || '';
+        if (!partner) {
+          if (href.includes('lootbar.')) partner = 'lootbar';
+          else if (href.includes('eldorado.')) partner = 'eldorado';
+        }
+        if (partner && typeof window.gtag === 'function') {
+          const seg = window.location.pathname.split('/').filter(Boolean)[0] || 'home';
+          window.gtag('event', 'affiliate_click', {
+            partner,
+            game: seg,
+            placement: a.getAttribute('data-aff-placement') || 'inline_link',
+            link_url: href,
+          });
         }
       });
     </script>

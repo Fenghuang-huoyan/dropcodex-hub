@@ -12,6 +12,30 @@ export const weMarchAsOneModule: GameModule = {
     priceLabel: '$7.99 · Free Demo on Steam',
     summary:
       '100% client-extracted unit database (Build #26192930): compute exact Gold recruitment costs, hard-counter DPS multipliers (Square 1.5x vs Diamond, Triangle 1.75x vs Square, Chevron 1.5x vs Big), 62 skill tree unlocks, and 0.4x defeat kill bounties.',
+  hasRealMap: false,
+  hasPlayerTrading: false,
+  seo: {
+    "overviewTitle": "We March as One Unit Stats, Armor Counters & Gold Planner — DropCodex",
+    "overviewDesc": "Extracted from Unity Build #26192930: all 8 playable unit shapes, 5-channel armor resistances, hard-counter multipliers, and 0.4x defeat gold math.",
+    "calcTitle": "We March as One Army Gold Budget & Squad Cost Planner — DropCodex",
+    "calcDesc": "Plan squad recruitment gold budgets across all 8 extracted unit shapes in We March as One (Build #26192930).",
+    "calcHeading": "We March as One — Squad Gold & Unit Planner",
+    "calcCardTitle": "Squad Recruitment Gold Planner",
+    "calcCardDesc": "Calculate total recruitment gold and compare unit combat roles extracted from Build #26192930.",
+    "dbTitle": "We March as One Unit Database (8 Extracted Shapes & Counters) — DropCodex",
+    "dbDesc": "Exact HP, DPS, range, 5-channel armor resistances, and 2.25x hard-counter multipliers from Build #26192930.",
+    "dbCardDesc": "Inspect exact HP, attack rate, armor channels, and counter multipliers for all 8 shapes.",
+    "mapTitle": "We March as One Campaign Act Checklist — DropCodex",
+    "mapDesc": "Campaign stage milestone checklist for We March as One.",
+    "mapCardDesc": "Track campaign act milestones from Wave 1 to Wave 25.",
+    "valuesTitle": "We March as One Unit Efficiency Benchmarks — DropCodex",
+    "valuesDesc": "DPS-per-gold benchmarks across all 8 extracted shapes."
+},
+  introParagraphs: [
+    "Every unit statistic in this We March as One module was extracted directly from the Unity 6000.6.0f1 client binary (Assembly-CSharp.dll and English localization tables, Build #26192930). Combat resolves across five distinct damage channels—Slash, Pierce, Blunt, Siege, and Arcane—paired with explicit class hard counters.",
+    "Key extracted combat math: Spearmen deal a 2.25x hard-counter multiplier against charging Cavalry, while Crossbowmen bypass 70% of heavy armor on Shieldbearers and Knights. Economy progression is cumulative: fallen troops always return after battle, and even a defeat pays a guaranteed 0.4x kill-bounty gold floor.",
+    "For full 25-wave enemy composition presets and interactive counter-loadout simulation, you can also use our dedicated companion simulator at wemarchasone.wiki/calculator."
+],
     art: {
       header: '/images/games/we-march-as-one/header.jpg',
       hero: '/images/games/we-march-as-one/hero.jpg',

@@ -2,16 +2,19 @@
 import HubLayout from '../layouts/HubLayout.astro';
 import { hubConfig } from '../config/hub.config.mjs';
 ---
-<HubLayout title={`Contact — ${hubConfig.brandName}`} description={`Contact editorial maintainers of ${hubConfig.brandName}.`}>
+<HubLayout title={`Contact — ${hubConfig.brandName}`} description={`Contact the editorial and engineering maintainers of ${hubConfig.brandName} for formula corrections, patch updates, or copyright inquiries.`}>
   <section class="hero">
     <span class="eyebrow">Support &amp; Corrections</span>
     <h1>Contact {hubConfig.brandName}</h1>
-    <p class="subtitle">Report recipe updates, patch changes, or compliance inquiries.</p>
+    <p class="subtitle">Report game patch changes, calculator formula fixes, or compliance inquiries.</p>
   </section>
-  <section class="card" style="margin-top:1.25rem;">
-    <p>
-      For data corrections, patch formula updates, copyright questions, or partnership inquiries regarding <strong>{hubConfig.domain}</strong>, email our editorial desk directly at:
+  <section class="card" style="margin-top:1.25rem; display:grid; gap:0.85rem; line-height:1.65;">
+    <p style="margin:0;">
+      For client-build data corrections, recipe or stat updates after a Steam patch, copyright/attribution requests, or advertising inquiries regarding <strong>{hubConfig.domain}</strong>, email our editorial desk directly at:
       <a href={`mailto:${hubConfig.editorialEmail}`} style="font-weight:700; color:var(--accent-bright); margin-left:0.25rem;">{hubConfig.editorialEmail}</a>.
+    </p>
+    <p style="margin:0; color:var(--text-muted); font-size:0.92rem;">
+      <strong>What to include in data bug reports:</strong> Please note the game module URL, the Steam Build ID or patch date shown in your client, and the item or formula value that changed so we can re-verify against the latest build files. Please note that {hubConfig.brandName} is an independent reference site and cannot assist with in-game account recovery, bans, or publisher support tickets.
     </p>
   </section>
 </HubLayout>

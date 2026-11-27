@@ -11,44 +11,41 @@ const keyUrl = (game.affiliateLinks.steamKeyUrl || monetizationConfig.cpsDefault
 const eldoradoUrl = (game.affiliateLinks.eldoradoUrl || monetizationConfig.cpsDefaults.eldoradoBaseUrl || '').trim();
 const lootbarUrl = (game.affiliateLinks.lootbarUrl || monetizationConfig.cpsDefaults.lootbarBaseUrl || '').trim();
 const proOn = monetizationConfig.proPass.enabled && monetizationConfig.proPass.creemCheckoutUrl.trim().length > 0;
-const anyAffiliate = Boolean(keyUrl || eldoradoUrl || lootbarUrl);
-const isConsoleNoSteam = game.steamAppId === 0;
-const storeBtnLabel = isConsoleNoSteam ? 'Official Game Page →' : 'Official Steam Page →';
-const lootbarBtnLabel = game.slug === 'gta-6' ? 'PSN / Xbox Gift Card Deal →' : 'UID Top-Up Deal →';
+const anyAffiliate = Boolean(keyUrl || eldoradoUrl || lootbarUrl || proOn);
+const lootbarBtnLabel = game.slug === 'gta-6' ? 'PSN Gift Card Deal (LootBar) →' : 'UID Top-Up Deal (LootBar) →';
 ---
-<section class="card" style="margin: 1.25rem 0;" aria-label="Official Store & Pro Tools">
-  <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:0.75rem;">
-    <div style="min-width:0; flex:1;">
-      <span class="badge" style="margin-bottom:0.35rem;">{game.priceLabel}</span>
-      <h3 style="margin:0 0 0.25rem; font-size:1rem;">{game.title} — Official Store &amp; Partner Resources</h3>
-      <p style="margin:0; font-size:0.82rem; color:var(--muted);">
-        {anyAffiliate ? monetizationConfig.disclosure : `Verified official storefront reference (${game.releaseLabel}).`}
-      </p>
+{anyAffiliate && (
+  <section class="card" style="margin: 1.25rem 0;" aria-label="Partner Resources & Deals" data-affiliate-zone="monetization_bar" data-game-slug={game.slug}>
+    <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:0.75rem;">
+      <div style="min-width:0; flex:1;">
+        <span class="badge" style="margin-bottom:0.35rem;">{game.priceLabel}</span>
+        <h3 style="margin:0 0 0.25rem; font-size:1rem;">{game.title} — Recharge &amp; Gift Card Deals</h3>
+        <p style="margin:0; font-size:0.82rem; color:var(--muted);">
+          {monetizationConfig.disclosure}
+        </p>
+      </div>
+      <div style="display:flex; flex-wrap:wrap; gap:0.5rem;">
+        {keyUrl && (
+          <a class="btn btn-outline" href={keyUrl} target="_blank" rel="sponsored noopener" data-aff-partner="lootbar" data-aff-placement="monetization_bar_secondary">
+            {game.slug === 'gta-6' ? 'Xbox Gift Card Deal →' : 'Compare Steam Key Deal →'}
+          </a>
+        )}
+        {eldoradoUrl && (
+          <a class="btn" href={eldoradoUrl} target="_blank" rel="sponsored noopener" data-aff-partner="eldorado" data-aff-placement="monetization_bar">
+            Live Market (Eldorado) →
+          </a>
+        )}
+        {lootbarUrl && (
+          <a class="btn" href={lootbarUrl} target="_blank" rel="sponsored noopener" data-aff-partner="lootbar" data-aff-placement="monetization_bar">
+            {lootbarBtnLabel}
+          </a>
+        )}
+        {proOn && (
+          <a class="btn" href={monetizationConfig.proPass.creemCheckoutUrl} target="_blank" rel="noopener">
+            Unlock Pro Pass ({monetizationConfig.proPass.priceLabel})
+          </a>
+        )}
+      </div>
     </div>
-    <div style="display:flex; flex-wrap:wrap; gap:0.5rem;">
-      <a class="btn btn-outline" href={game.officialStoreUrl} target="_blank" rel="noopener noreferrer">
-        {storeBtnLabel}
-      </a>
-      {keyUrl && (
-        <a class="btn" href={keyUrl} target="_blank" rel="sponsored noopener noreferrer">
-          Compare Steam Key Deal →
-        </a>
-      )}
-      {eldoradoUrl && (
-        <a class="btn" href={eldoradoUrl} target="_blank" rel="sponsored noopener noreferrer">
-          Live Market (Eldorado) →
-        </a>
-      )}
-      {lootbarUrl && (
-        <a class="btn" href={lootbarUrl} target="_blank" rel="sponsored noopener noreferrer">
-          {lootbarBtnLabel}
-        </a>
-      )}
-      {proOn && (
-        <a class="btn" href={monetizationConfig.proPass.creemCheckoutUrl} target="_blank" rel="noopener noreferrer">
-          Unlock Pro Pass ({monetizationConfig.proPass.priceLabel})
-        </a>
-      )}
-    </div>
-  </div>
-</section>
+  </section>
+)}

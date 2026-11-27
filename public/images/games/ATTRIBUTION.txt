@@ -1,13 +1,32 @@
-Official Steam Store promotional assets cached locally for editorial/reference identification:
+DropCodex Image & Asset Attribution Manifest
+Last updated: 28 November 2026
 
-- main-sequence/header.jpg (AppID 2487190): https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2487190/9f75d23dd877267e001e58afe082b7b3eaf53caa/header_alt_assets_1.jpg?t=1794507021
-- main-sequence/hero.jpg (AppID 2487190): https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2487190/0ca3147c3f99048208b2dc09507465a8db555004/ss_0ca3147c3f99048208b2dc09507465a8db555004.1920x1080.jpg?t=1794507021
-- main-sequence/map-bg.jpg (AppID 2487190): https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2487190/8bf63ef47ec9297b5d8dd651d1160c69ba43f177/ss_8bf63ef47ec9297b5d8dd651d1160c69ba43f177.600x338.jpg?t=1794507021
-- below-the-stone/header.jpg (AppID 1170230): https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1170230/8a9f382f0b687c602e22520b6612e4a33da705a2/header.jpg?t=1794929807
-- below-the-stone/hero.jpg (AppID 1170230): https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1170230/ss_1d862fc80fd411866a8e3346bdced39fb88ad263.1920x1080.jpg?t=1794929807
-- below-the-stone/map-bg.jpg (AppID 1170230): https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1170230/ss_4a3d4bc2ffdb0874cf276ad138204483785a34b1.600x338.jpg?t=1794929807
-- noble-fates/header.jpg (AppID 1769420): https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1769420/3c20b2ba1b66a628012e0bb36eb6b84bf6fe17b2/header_alt_assets_9.jpg?t=1794505279
-- noble-fates/hero.jpg (AppID 1769420): https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1769420/6670cc174e6c25a93a4c1431e1d6e1acb9d7c4af/ss_6670cc174e6c25a93a4c1431e1d6e1acb9d7c4af.1920x1080.jpg?t=1794505279
-- noble-fates/map-bg.jpg (AppID 1769420): https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1769420/8c1884f3b4618b362da04f33752ce69904079d34/ss_8c1884f3b4618b362da04f33752ce69904079d34.600x338.jpg?t=1794505279
-- gta-6/{header,hero,map-bg}.jpg: Original DropCodex procedural vector radar & contour telemetry graphics.
-- items/main-sequence/T_*.png: Main Sequence (AppID 2487190 / Demo 3640620, Build #26097974) in-game 64x64 item reference icons used for database identification.
+All official game header banners, capsules, screenshots, and unpacked client item sprites hosted under /images/games/<slug>/ belong to their respective copyright holders and are served locally for commentary, gameplay utility reference, and non-hotlinking archival purposes:
+
+1. Main Sequence (/images/games/main-sequence/)
+   - Developer / Publisher: Odd Meter / HypeTrain Digital (Steam AppID 3622250 / Demo 3640620)
+   - Store capsule & item icons extracted from Main Sequence Demo Build #26148731.
+
+2. Noble Fates (/images/games/noble-fates/)
+   - Developer / Publisher: Xobermon, LLC (Steam AppID 1769420 / Demo 4114570)
+   - Store capsule & item sprites extracted from Noble Fates Demo OctDats Build #20767119.
+
+3. We March as One (/images/games/we-march-as-one/)
+   - Developer / Publisher: dux (Steam AppID 5189160 / Demo 5403150)
+   - Store capsule & geometric unit icons extracted from Demo Build #26192930.
+
+4. No Asteroids (/images/games/no-asteroids/)
+   - Developer / Publisher: Hairy Heart Games (Steam AppID 3826200 / Demo 5527800)
+   - Store capsule & 24 mineral/module icons extracted from Demo v1.0.6 Build #26931893.
+
+5. Below the Stone (/images/games/below-the-stone/)
+   - Developer / Publisher: Strollart / Apogee Entertainment (Steam AppID 1170230)
+   - Official Steam CDN capsule artwork.
+
+6. Marvel Rivals (/images/games/marvel-rivals/)
+   - Developer / Publisher: NetEase Games / Marvel Games (Steam AppID 2767030)
+   - Official Steam CDN capsule artwork.
+
+7. Grand Theft Auto VI (/images/games/gta-6/)
+   - Developer / Publisher: Rockstar Games / Take-Two Interactive
+   - Original DropCodex procedural vector/SVG diagrams (no leaked or unlicensed Rockstar assets).

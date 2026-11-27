@@ -12,6 +12,30 @@ export const marvelRivalsModule: GameModule = {
     priceLabel: 'Free-to-Play · UID Lattice Top-Up Deals',
     summary:
       'Calculate exact Lattice-to-Units (1:1) conversion packs, 990 Lattice Luxury BattlePass net rebates (600 Lattice + 600 Units returned), and cheapest pack combinations for 1,600 Epic & 2,200 Legendary hero bundles.',
+  hasRealMap: false,
+  hasPlayerTrading: false,
+  seo: {
+    "overviewTitle": "Marvel Rivals Lattice Top-Up Planner, BattlePass Rebate & Bundle Math — DropCodex",
+    "overviewDesc": "Calculate Marvel Rivals Lattice-to-Units conversions, 990 Lattice Luxury BattlePass rebates, 2,200 Legendary skin bundle combos, and UID top-up deals.",
+    "calcTitle": "Marvel Rivals Lattice Bundle & Luxury BattlePass Rebate Calculator — DropCodex",
+    "calcDesc": "Plan exact Lattice packs for 1,600 Epic and 2,200 Legendary Hero Costume Bundles, plus 990 Lattice Luxury BattlePass rebates.",
+    "calcHeading": "Marvel Rivals — Lattice & Costume Bundle Planner",
+    "calcCardTitle": "Lattice Pack & Costume Bundle Planner",
+    "calcCardDesc": "Match official Lattice packs (100 to 11,680) against Epic (1,600) and Legendary (2,200) skin bundles.",
+    "dbTitle": "Marvel Rivals Lattice Packs, Units & Bundle Cost Table — DropCodex",
+    "dbDesc": "Complete Marvel Rivals currency reference: all 6 Lattice packs, bonus tiers, Luxury BattlePass rebates, and costume bundle prices.",
+    "dbCardDesc": "Compare all 6 Lattice pack tiers, bonus percentages, and hero costume bundle Unit costs.",
+    "mapTitle": "Marvel Rivals Competitive Map Callouts — DropCodex",
+    "mapDesc": "Destructible choke points across Yggsgard, Tokyo 2099, and Wakanda.",
+    "mapCardDesc": "Competitive mode callout checklist.",
+    "valuesTitle": "Marvel Rivals Currency Efficiency Index — DropCodex",
+    "valuesDesc": "Lattice-per-dollar and BattlePass rebate efficiency reference."
+},
+  introParagraphs: [
+    "Marvel Rivals uses a two-currency cosmetic economy: paid Lattice (purchased in packs from 100 to 11,680) converts 1:1 into Units, while Units are also earned through seasonal Heroic Achievements and Chrono Token exchanges. Understanding exact pack breakpoints prevents overbuying when unlocking hero skins.",
+    "Best-value breakpoint: A Legendary Hero Bundle costs 2,200 Units. Instead of buying both the 2,180 Lattice pack ($19.99) and an extra 100 Lattice pack ($0.99), claim 20 free Units from any starter Heroic Achievement milestone so a single 2,180 pack unlocks the full 2,200 bundle cleanly.",
+    "Luxury BattlePass math: Upgrading for 990 Lattice returns 600 Lattice plus 600 Units across completed pages (1,200 combined value). Players recharging Lattice via UID can also check third-party partner bundles on LootBar using only their numeric in-game UID."
+],
     art: {
       header: '/images/games/marvel-rivals/header.jpg',
       hero: '/images/games/marvel-rivals/hero.jpg',

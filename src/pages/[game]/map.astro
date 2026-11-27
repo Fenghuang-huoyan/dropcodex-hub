@@ -18,6 +18,9 @@ interface Props {
 const { game } = Astro.props;
 const storageKey = `dropcodex_map_${game.slug}_v1`;
 const pinsJson = JSON.stringify(game.mapPins);
+const shouldNoindex = game.hasRealMap === false;
+const pageTitle = game.seo?.mapTitle ?? `${game.title} Interactive Map & Checklist — ${hubConfig.brandName}`;
+const pageDesc = game.seo?.mapDesc ?? `Interactive tactical reference nodes and browser completion checklist for ${game.title}.`;
 
 const catColor: Record<string, string> = {
   'Resource': '#22c55e',
@@ -27,11 +30,12 @@ const catColor: Record<string, string> = {
 };
 ---
 <HubLayout
-  title={`${game.title} Interactive Map & Completion Save Tracker — ${hubConfig.brandName}`}
-  description={`Interactive tactical map, resource veins, extraction points, and browser save completion tracker for ${game.title}.`}
+  title={pageTitle}
+  description={pageDesc}
   ogImage={game.art.header}
+  noindex={shouldNoindex}
 >
-  <GameHero game={game} active="map" heading={`${game.title} — Interactive Tactical Map`} />
+  <GameHero game={game} active="map" heading={`${game.title} — Zone & Node Tracker`} subtitle={pageDesc} />
 
   <div class="panel">
     <div class="panel-head">

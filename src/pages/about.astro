@@ -2,20 +2,27 @@
 import HubLayout from '../layouts/HubLayout.astro';
 import { hubConfig } from '../config/hub.config.mjs';
 ---
-<HubLayout title={`About & Data Verification Method — ${hubConfig.brandName}`} description={`How ${hubConfig.brandName} verifies game data, client recipe tables, and browser tools.`}>
+<HubLayout title={`About & Data Verification Method — ${hubConfig.brandName}`} description={`How ${hubConfig.brandName} extracts client game tables, verifies patch formulas, and builds browser calculators.`}>
   <section class="hero">
     <span class="eyebrow">Editorial &amp; Engineering Method</span>
     <h1>About {hubConfig.brandName}</h1>
-    <p class="subtitle">Independent game calculators, interactive completion maps, and verified databases.</p>
+    <p class="subtitle">Client-extracted game calculators, progression breakpoints, and searchable databases.</p>
   </section>
   <section class="card" style="margin-top:1.25rem;">
-    <h2>How We Build Tools</h2>
+    <h2>How We Verify Game Data</h2>
     <p>
-      {hubConfig.brandName} builds interactive browser utilities—production ratio calculators, local-storage completion maps, and WFL trade checkers—around verified game mechanics and structured game tables rather than generic text rewrites.
+      {hubConfig.brandName} builds fast browser utilities—multi-stage production planners, armor counter calculators, ore glut tables, and season currency planners—directly from verified game client data tables (Unreal Engine IoStore assets, Unity assemblies, OctDats, and ASAR bundles) and dated official patch notes rather than generic AI-rewritten summaries.
     </p>
-    <h2>Unofficial Fan Reference Disclaimer</h2>
     <p>
-      {hubConfig.brandName} is not affiliated with, endorsed by, or sponsored by Valve Corporation, Roblox Corporation, or any individual game studio indexed on this domain.
+      Every module displays the exact client build or patch version it was verified against. When a live hotfix changes an in-game value before our next extraction pass, always trust the live game client.
+    </p>
+    <h2>Unofficial Fan Reference &amp; Trademark Disclaimer</h2>
+    <p>
+      {hubConfig.brandName} ({hubConfig.domain}) is an independent fan-operated utility workbench. It is not affiliated with, endorsed by, or sponsored by Valve Corporation, Rockstar Games, Take-Two Interactive, NetEase Games, Marvel, or any individual game studio indexed on this domain. All game titles, icons, and trademarks belong to their respective owners.
+    </p>
+    <h2>Editorial Contact</h2>
+    <p>
+      Found a formula change after a patch? Reach us at <a href={`mailto:${hubConfig.editorialEmail}`}>{hubConfig.editorialEmail}</a>.
     </p>
   </section>
 </HubLayout>

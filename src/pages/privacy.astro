@@ -2,18 +2,31 @@
 import HubLayout from '../layouts/HubLayout.astro';
 import { hubConfig } from '../config/hub.config.mjs';
 ---
-<HubLayout title={`Privacy Policy — ${hubConfig.brandName}`} description={`Privacy Policy, localStorage usage, Google Analytics, Google AdSense cookies, and affiliate disclosures for ${hubConfig.brandName}.`}>
+<HubLayout title={`Privacy Policy — ${hubConfig.brandName}`} description={`Privacy Policy, localStorage map checklists, Google Analytics, Google AdSense cookies, and affiliate disclosures for ${hubConfig.brandName}.`}>
   <section class="hero">
-    <span class="eyebrow">Compliance</span>
+    <span class="eyebrow">Compliance &amp; Data Transparency</span>
     <h1>Privacy Policy</h1>
-    <p class="subtitle">Effective date: 23 November 2026.</p>
+    <p class="subtitle">Last updated: 28 November 2026.</p>
   </section>
   <section class="card" style="margin-top:1.25rem;">
-    <h2>1. Local Browser Storage</h2>
-    <p>Interactive map pins, calculator presets, and checklists save progress strictly inside your own browser's <code>localStorage</code>. Imported save files are parsed locally in memory and never uploaded to our servers.</p>
-    <h2>2. Analytics &amp; Advertising Cookies (Google AdSense)</h2>
-    <p>We use Google Analytics to measure aggregated traffic and may display advertisements through Google AdSense or certified gaming ad networks. Third-party vendors, including Google, use cookies to serve ads based on prior visits. You may opt out of personalized advertising at <a href="https://adssettings.google.com/" target="_blank" rel="noopener noreferrer">adssettings.google.com</a>.</p>
+    <h2>1. Local Browser Storage &amp; Shareable URLs</h2>
+    <p>
+      Interactive map node checklists save completion state strictly inside your own browser's <code>localStorage</code>. Calculator item and quantity selections update your browser address bar locally so you can bookmark or share links. Exported or imported <code>.json</code> map files are parsed strictly in client memory and are never uploaded to our servers.
+    </p>
+    <h2>2. Analytics &amp; Advertising Cookies (Google Analytics &amp; Google AdSense)</h2>
+    <p>
+      We use Google Analytics 4 (<code>{hubConfig.gaMeasurementId}</code>), which sets first-party cookies (such as <code>_ga</code>) to measure aggregated page views and outbound partner link clicks. Third-party vendors, including Google AdSense, use cookies (such as the DoubleClick/AdSense cookie) to serve ads based on a user's prior visits to this website or other websites on the internet.
+    </p>
+    <p>
+      Users may opt out of personalized advertising by visiting <a href="https://adssettings.google.com/" target="_blank" rel="noopener noreferrer">Google Ads Settings</a> or <a href="https://www.aboutads.info/choices/" target="_blank" rel="noopener noreferrer">www.aboutads.info/choices</a>.
+    </p>
     <h2>3. Affiliate Disclosure</h2>
-    <p>Marked partner links to authorized Steam key retailers, UID top-up services, or item marketplaces may generate a referral commission at no extra cost to you.</p>
+    <p>
+      Marked outbound links to third-party digital gift card or UID top-up marketplaces (such as LootBar or Eldorado) may earn a referral commission at no extra cost to you. We never request your game account password or payment details on {hubConfig.domain}.
+    </p>
+    <h2>4. Privacy Contact</h2>
+    <p>
+      For privacy inquiries or data questions regarding {hubConfig.domain}, contact: <a href={`mailto:${hubConfig.editorialEmail}`}>{hubConfig.editorialEmail}</a>.
+    </p>
   </section>
 </HubLayout>

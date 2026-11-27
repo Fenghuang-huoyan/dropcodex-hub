@@ -8,7 +8,7 @@ interface Props {
   heading: string;
   subtitle?: string;
 }
-const { game, active, heading } = Astro.props;
+const { game, active, heading, subtitle } = Astro.props;
 ---
 <section class="compact-game-bar">
   <img class="compact-game-bg" src={game.art.hero} alt="" width="1280" height="720" decoding="async" />
@@ -26,6 +26,11 @@ const { game, active, heading } = Astro.props;
       <div style="min-width:0;">
         <span class="compact-meta">{game.statusBadge} · {game.releaseLabel}</span>
         <h1>{heading}</h1>
+        {subtitle && (
+          <p style="margin:0.25rem 0 0; font-size:0.82rem; color:var(--text-dim); max-width:700px; line-height:1.45;">
+            {subtitle}
+          </p>
+        )}
       </div>
     </div>
     <GameNav game={game} active={active} />

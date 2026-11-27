@@ -12,6 +12,30 @@ export const belowTheStoneModule: GameModule = {
     priceLabel: '$11.99 USD on Steam',
     summary:
       'Verified 1.0 extraction progression planner across Layers 1–3 and 9 cave biomes: calculate Coal-fueled Furnace ingot batches, pickaxe mining gates, Elf Alchemist potions, and Arcanium Magic Crafter loadouts.',
+  hasRealMap: true,
+  hasPlayerTrading: false,
+  seo: {
+    "overviewTitle": "Below the Stone 1.0 Smelting Calculator, Ingot Ratios & Biome Map — DropCodex",
+    "overviewDesc": "Verified Below the Stone 1.0 smelting tree calculator: 26 ores, coal fuel ratios, pickaxe progression tiers, potions, and 6 cave biome layers.",
+    "calcTitle": "Below the Stone 1.0 Smelting, Ingot & Pickaxe Ratio Calculator — DropCodex",
+    "calcDesc": "Calculate exact raw ore and coal counts for Bronze, Iron, Gold, Mithril, and Arcanium gear in Below the Stone 1.0.",
+    "calcHeading": "Below the Stone 1.0 — Smelting & Crafting Planner",
+    "calcCardTitle": "1.0 Smelting & Delver Gear Calculator",
+    "calcCardDesc": "Compute exact raw ore, coal, and intermediate ingot requirements across all 5 cave layers.",
+    "dbTitle": "Below the Stone 1.0 Item & Smelting Recipe Database (26 Entries) — DropCodex",
+    "dbDesc": "Searchable Below the Stone 1.0 database covering raw ores, smelted ingots, delver pickaxes, armor sets, and cave potions.",
+    "dbCardDesc": "Filter 26 ores, ingots, pickaxes, and potions by biome layer and crafting station.",
+    "mapTitle": "Below the Stone 1.0 Biome Layer & Boss Depth Map — DropCodex",
+    "mapDesc": "Interactive depth chart covering Fungal Kingdom, Crystal Caverns, Magma Core, and Deep Chasm extraction nodes.",
+    "mapCardDesc": "Track 6 depth layers, biome bosses, and extraction drill pods.",
+    "valuesTitle": "Below the Stone 1.0 Ingot & Gear Value Index — DropCodex",
+    "valuesDesc": "Kingdom coin values for smelted ingots and delver equipment."
+},
+  introParagraphs: [
+    "Below the Stone 1.0 revolves around risk-reward delving: anything in your backpack is lost if you fall underground unless banked via extraction pods, making pre-run ore math critical. This calculator maps the exact raw ore and coal feedstock required before you descend into deeper strata.",
+    "Progression follows strict pickaxe hardness tiers: Tin and Copper alloy into Bronze for early Fungal and Geode strata, Iron and Silver unlock mid-depth caverns, while Gold, Mithril, and Arcanium demand sustained Coal reserves to smelt high-tier bars without wasting inventory slots.",
+    "Use the interactive biome depth tracker to check off boss milestones and shrine upgrades locally in your browser as you push toward the Core."
+],
     art: {
       header: '/images/games/below-the-stone/header.jpg',
       hero: '/images/games/below-the-stone/hero.jpg',

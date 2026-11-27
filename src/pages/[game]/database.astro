@@ -16,17 +16,21 @@ interface Props {
   game: GameModule;
 }
 const { game } = Astro.props;
+const pageTitle = game.seo?.dbTitle ?? `${game.title} Database & Reference Index — ${hubConfig.brandName}`;
+const pageDesc = game.seo?.dbDesc ?? game.summary;
+const lookupHeading = game.seo?.quickLookupHeading ?? 'Verified Unlock Breakpoints & Quick Reference';
+const isEconomyStyle = game.slug === 'marvel-rivals' || game.slug === 'gta-6' || game.slug === 'we-march-as-one';
 ---
 <HubLayout
-  title={`${game.title} Item Database, Recipes & Drop Sources — ${hubConfig.brandName}`}
-  description={`Searchable item database, crafting recipes, power draw, and drop locations for ${game.title}.`}
+  title={pageTitle}
+  description={pageDesc}
   ogImage={game.art.header}
 >
   <GameHero
     game={game}
     active="database"
-    heading={`${game.title} Item & Recipe Database`}
-    subtitle="Search and filter materials, intermediate components, and high-tier gear by rarity or source facility."
+    heading={`${game.title} — Reference Database (${game.items.length})`}
+    subtitle={pageDesc}
   />
 
   <MonetizationBar game={game} />
@@ -35,15 +39,15 @@ const { game } = Astro.props;
     <section class="card" style="margin-bottom:1.25rem;">
       <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:0.75rem; margin-bottom:0.85rem;">
         <div>
-          <span class="badge rarity-Legendary" style="margin-bottom:0.25rem;">INSTANT CODE LOOKUP ({game.quickCodes.length})</span>
-          <h2 style="margin:0; font-size:1.1rem;">Verified Safe Combinations, Door Keypads &amp; Controller Inputs</h2>
+          <span class="badge rarity-Legendary" style="margin-bottom:0.25rem;">QUICK REFERENCE ({game.quickCodes.length})</span>
+          <h2 style="margin:0; font-size:1.1rem;">{lookupHeading}</h2>
         </div>
         <input
           id="code-filter"
           class="input"
           type="search"
-          placeholder="Filter location, gang, or digits (e.g. Kingpin, 0300, $250,000)..."
-          aria-label="Filter safe codes and cheats"
+          placeholder="Filter target, requirement, or note..."
+          aria-label="Filter reference entries"
           style="max-width:360px;"
         />
       </div>
@@ -51,11 +55,11 @@ const { game } = Astro.props;
         <table>
           <thead>
             <tr>
-              <th>Location / Effect</th>
+              <th>Target / Layer</th>
               <th>Type</th>
-              <th>Code / D-Pad Combo</th>
-              <th>Region / Unlock Requirement</th>
-              <th>Field Note</th>
+              <th>Breakpoint / Formula</th>
+              <th>Unlock Condition</th>
+              <th>Verified Note</th>
             </tr>
           </thead>
           <tbody id="code-tbody">
@@ -86,8 +90,8 @@ const { game } = Astro.props;
             <th>Category</th>
             <th>Rarity</th>
             <th>Base Value</th>
-            <th>Cycle / Power</th>
-            <th>Source / Station</th>
+            <th>{isEconomyStyle ? 'Batch / Tier' : 'Cycle / Load'}</th>
+            <th>Source / Details</th>
           </tr>
         </thead>
         <tbody id="db-tbody">

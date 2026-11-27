@@ -12,6 +12,30 @@ export const gta6Module: GameModule = {
     priceLabel: 'PS5 & Xbox Series X|S',
     summary:
       'Instant lookup for all 19 hardcoded Leonida gang safe & door codes, Chapter 1–4 black-market fence laundering margins (Moses, Yasmani, Randy), and armored bank vault payouts.',
+  hasRealMap: false,
+  hasPlayerTrading: false,
+  seo: {
+    "overviewTitle": "GTA VI Console Payout Planner, Fence Margins & Gift Card Deals — DropCodex",
+    "overviewDesc": "GTA VI PS5 & Xbox Series X|S heist split planner, fence laundering payout breakdowns, and discounted PSN / Xbox digital gift card links.",
+    "calcTitle": "GTA VI Heist Split & Fence Laundering Payout Calculator — DropCodex",
+    "calcDesc": "Calculate net cash payouts across Leonida fence tiers, crew cut deductions, and multi-run heist targets in USD.",
+    "calcHeading": "GTA VI — Cash Payout & Laundering Planner",
+    "calcCardTitle": "Heist & Fence Cash Payout Planner",
+    "calcCardDesc": "Estimate gross vs. net USD cash across Leonida fence cuts, laundering stages, and crew shares.",
+    "dbTitle": "GTA VI Payout & Operation Reference Table — DropCodex",
+    "dbDesc": "Searchable index of Leonida cash operations, fence conversion tiers, and vehicle/contraband payout benchmarks.",
+    "dbCardDesc": "Filter indexed heist stages, fence conversion steps, and USD payout tiers.",
+    "mapTitle": "GTA VI Leonida Region Checklist — DropCodex",
+    "mapDesc": "Regional reference checklist for Vice City, Leonida Keys, and Port Gellhorn.",
+    "mapCardDesc": "Regional checklist across Leonida districts.",
+    "valuesTitle": "GTA VI Cash Operation Benchmarks — DropCodex",
+    "valuesDesc": "Reference payout tiers for major Leonida operations."
+},
+  introParagraphs: [
+    "This Grand Theft Auto VI console planner models multi-step cash conversion and crew split math in USD for PlayStation 5 and Xbox Series X|S players. Instead of guessing how much raw take survives fence fees and getaway expenses, select an operation tier above to break down gross take versus net pocketed cash.",
+    "Console store tip: Because GTA VI launched on PS5 and Xbox Series X|S, players funding digital editions, online currency packs, or console subscriptions can compare discounted PlayStation Network (PSN) and US Xbox digital gift cards through our linked partner deals before redeeming on the official console store.",
+    "Data policy: Unverified rumor codes are excluded from our main index. Every entry is labeled by operation category and updated as official Rockstar Games title updates roll out."
+],
     art: {
       header: '/images/games/gta-6/header.jpg',
       hero: '/images/games/gta-6/hero.jpg',

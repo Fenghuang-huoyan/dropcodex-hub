@@ -1,0 +1,24 @@
+---
+import HubLayout from '../layouts/HubLayout.astro';
+import { hubConfig } from '../config/hub.config.mjs';
+import { gamesRegistry } from '../data/games';
+---
+<HubLayout
+  title={`404 Page Not Found — ${hubConfig.brandName}`}
+  description={`The requested page could not be found on ${hubConfig.brandName}. Jump directly to our verified game calculators and databases.`}
+  noindex={true}
+>
+  <section class="card" style="margin-top:1.5rem; padding:2rem;">
+    <span class="badge rarity-Epic" style="margin-bottom:0.5rem;">404 · ROUTE NOT FOUND</span>
+    <h1 style="margin:0 0 0.5rem; font-size:1.6rem;">That coordinate is off the radar</h1>
+    <p style="margin:0 0 1.25rem; color:var(--text-dim); max-width:620px;">
+      The URL you entered may have moved or been mistyped. Use the global search bar above (press <code>/</code>) or jump straight into an active calculator workbench below:
+    </p>
+    <div style="display:flex; flex-wrap:wrap; gap:0.5rem;">
+      <a class="btn" href="/">Return to Workbench Index</a>
+      {gamesRegistry.map((g) => (
+        <a class="btn btn-outline" href={`/${g.slug}/calculator/`}>{g.title}</a>
+      ))}
+    </div>
+  </section>
+</HubLayout>

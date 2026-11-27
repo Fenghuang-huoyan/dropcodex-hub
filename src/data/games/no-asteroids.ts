@@ -11,6 +11,31 @@ export const noAsteroidsModule: GameModule = {
     officialStoreUrl: 'https://store.steampowered.com/app/5527800/No_Asteroids/',
     priceLabel: 'Free Demo (#5541510) · Steam Hit',
     summary: '100% client-extracted v1.0.6 mining database (Build #26931893): exact ore prices ($3–$1,000), market glut 0.5x floor thresholds, rock hardness gates (Basalt 1.9 / Core 2.3 / Neutronium 3.0), and mining haul calculators for Drills, Lasers, Plasma Cutters & Orbital Collapsars.',
+  hasRealMap: true,
+  hasPlayerTrading: false,
+  seo: {
+    "overviewTitle": "No Asteroids v1.0.6 Ore Prices, Market Glut & Hardness Calculator — DropCodex",
+    "overviewDesc": "Client-extracted No Asteroids (v1.0.6 Build #26931893) database: all 11 mineral prices, market glut 0.5x decay caps, rock hardness gates, and tool haul calculator.",
+    "calcTitle": "No Asteroids v1.0.6 Mining Haul, Tool Cost & Upgrade Calculator — DropCodex",
+    "calcDesc": "Calculate exact Space Crystal, Plasmite, Neutronium, and Antimatter hauls needed for Lasers, Plasma Cutters, Drones, and Collapsars.",
+    "calcHeading": "No Asteroids v1.0.6 — Ore Haul & Upgrade Planner",
+    "calcCardTitle": "Ore Haul & Tool Upgrade Calculator",
+    "calcCardDesc": "Compute exact mineral hauls required to afford Drills, Mining Lasers ($42k), Plasma Cutters ($125k), and Orbital Collapsars ($1.2M).",
+    "dbTitle": "No Asteroids v1.0.6 Mineral Glut Caps, Hardness Gates & Tool DB — DropCodex",
+    "dbDesc": "Exact extracted v1.0.6 values: 11 minerals ($3–$1,000), market glut thresholds, Basalt/Core/Neutronium hardness gates, and 36 artifact radar unlocks.",
+    "dbCardDesc": "Search all 11 extracted minerals, glut caps, handheld tools, autonomous drones, and orbital ship guns.",
+    "mapTitle": "No Asteroids Layer Depth, Hardness Gates & Core Vault Map — DropCodex",
+    "mapDesc": "Interactive asteroid cross-section from Regolith to Singularity Core with exact Power gates and artifact room depths.",
+    "mapCardDesc": "Track all 5 asteroid depth strata from Regolith down to the $15,000 Core Safe and Strange Matter.",
+    "valuesTitle": "No Asteroids v1.0.6 Mineral Cash Efficiency Benchmarks — DropCodex",
+    "valuesDesc": "Extracted base prices and market glut pool capacities across all 11 minerals.",
+    "quickLookupHeading": "Verified Rock Layer Hardness Gates & Scanner Breakpoints"
+},
+  introParagraphs: [
+    "Extracted directly from the No Asteroids v1.0.6 client bundle (Steam Build #26931893, commit 69a3a934e), this workbench documents the hidden market glut formula and exact rock layer hardness thresholds governing your 90-day mission.",
+    "Market Glut formula: Every mineral has a hidden shift glut pool (Space Ice 2,500, Meteoric Iron 1,600, Gold/Crystal/Plasmite 1,000, Dark Matter/Antimatter 800, and Neutronium 2,250). Selling past that pool decays unit payout via 1 / (1 + sold / glut) down to a 0.50x floor. Because Neutronium ($45) has nearly triple the glut cap of Antimatter (2,250 vs. 800) and never drains suit oxygen, it is the strongest mid-to-late bulk cash mineral once you reach 3.0 Hit Power.",
+    "Hardness breakpoints (+5% Power per skill level, +10% global multiplier from the Dinos artifact set): Deep Stone requires 1.20 Power (Drill 1.30 native), Basalt requires 1.90 (Laser 2.00 native or Drill +10 Power), Core requires 2.30, Dark Matter 2.60, Neutronium 3.00 (Plasma Cutter 3.00 native), and Strange Matter ($1,000, gate 1e7) requires Core Lance, Slicer, Orbital Strike, or Collapsar."
+],
     art: {
       header: '/images/games/no-asteroids/header.jpg',
       hero: '/images/games/no-asteroids/hero.jpg',
@@ -405,10 +430,10 @@ export const noAsteroidsModule: GameModule = {
       { name: 'Dinos Artifact Set (+10% Global Mining Power Permanent Perk)', icon: '🦖', score: 860, demand: 9, rarity: 'Epic', trend: 'Stable' },
     ],
     quickCodes: [
-      { target: 'Deep Stone Layer', regionOrUnlock: 'Hardness Gate >= 1.20', codeOrCombo: 'Drill (Base 1.3) or Hammer +7 Power', type: 'Safe Code', note: 'Pickaxe maxes out at 1.10 Power (+20 Power ups) unless boosted by Dinos +10% set.' },
-      { target: 'Basalt Layer', regionOrUnlock: 'Hardness Gate >= 1.90', codeOrCombo: 'Laser (Base 2.0) or Drill +10 Power', type: 'Safe Code', note: 'Unlocks dense Plasmite ($26) pockets and deeper cave chambers.' },
-      { target: 'Neutronium Veins', regionOrUnlock: 'Hardness Gate >= 3.00', codeOrCombo: 'Plasma Cutter (3.0) or Laser +10 Power', type: 'Safe Code', note: 'Highest non-glut bulk cash source (2,250 glut threshold vs 800 on Antimatter).' },
-      { target: 'Strange Matter', regionOrUnlock: 'Hardness Gate 10,000,000', codeOrCombo: 'Lance / Slicer / Orbital Strike / Collapsar', type: 'Keypad / Door', note: 'Hardcoded immunity to standard tools; Missile Swarm deals 0.5x bypass.' },
-      { target: 'All 36 Artifacts Radar', regionOrUnlock: 'Mineral Scanner Lv.6', codeOrCombo: 'Base $300 x 2.3^Lvl (90m + Finds)', type: 'Keypad / Door', note: 'Completing Sets grants permanent perks: Dinos +10% Power, Lost&Found +10% Cargo, Depths +5% Ore Price.' },
+      { target: 'Deep Stone Layer', regionOrUnlock: 'Hardness Gate >= 1.20', codeOrCombo: 'Drill (Base 1.3) or Hammer +7 Power', type: 'Progression Gate', note: 'Pickaxe maxes out at 1.10 Power (+20 Power ups) unless boosted by Dinos +10% set.' },
+      { target: 'Basalt Layer', regionOrUnlock: 'Hardness Gate >= 1.90', codeOrCombo: 'Laser (Base 2.0) or Drill +10 Power', type: 'Progression Gate', note: 'Unlocks dense Plasmite ($26) pockets and deeper cave chambers.' },
+      { target: 'Neutronium Veins', regionOrUnlock: 'Hardness Gate >= 3.00', codeOrCombo: 'Plasma Cutter (3.0) or Laser +10 Power', type: 'Progression Gate', note: 'Highest non-glut bulk cash source (2,250 glut threshold vs 800 on Antimatter).' },
+      { target: 'Strange Matter', regionOrUnlock: 'Hardness Gate 10,000,000', codeOrCombo: 'Lance / Slicer / Orbital Strike / Collapsar', type: 'Scanner Tier', note: 'Hardcoded immunity to standard tools; Missile Swarm deals 0.5x bypass.' },
+      { target: 'All 36 Artifacts Radar', regionOrUnlock: 'Mineral Scanner Lv.6', codeOrCombo: 'Base $300 x 2.3^Lvl (90m + Finds)', type: 'Scanner Tier', note: 'Completing Sets grants permanent perks: Dinos +10% Power, Lost&Found +10% Cargo, Depths +5% Ore Price.' },
     ],
   };

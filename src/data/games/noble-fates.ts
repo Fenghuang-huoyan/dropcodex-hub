@@ -12,6 +12,30 @@ export const nobleFatesModule: GameModule = {
     priceLabel: '$19.99 · Free Demo on Steam',
     summary:
       '100% client-extracted OctDat database (Build #26823432): calculate exact Foundry & Forge metal rod trees, Stove meal comfort tiers, Winery vintages, Platemail sets, and Royal Prestige gear.',
+  hasRealMap: true,
+  hasPlayerTrading: false,
+  seo: {
+    "overviewTitle": "Noble Fates 1.0 Crafting Calculator & OctDats Recipe Database — DropCodex",
+    "overviewDesc": "Extracted from Noble Fates Build #26823432 OctDats: 30 core smelting, Steel Plate Mail, Royal Crown, brewing, and cooking chains with native icons.",
+    "calcTitle": "Noble Fates 1.0 Production, Smelting & Gear Ratio Calculator — DropCodex",
+    "calcDesc": "Calculate exact raw Iron, Copper, Silver, Gold, Coal, and crop inputs for Noble Fates 1.0 weapons, Steel Plate Mail, and feasts.",
+    "calcHeading": "Noble Fates 1.0 — Kingdom Crafting & Smelting Planner",
+    "calcCardTitle": "OctDats Crafting & Smelting Calculator",
+    "calcCardDesc": "Plan exact Wood, Coal, Ore, and Hide batches for kingdom armor, weapons, and tavern feasts.",
+    "dbTitle": "Noble Fates 1.0 Item & OctDats Recipe Database — DropCodex",
+    "dbDesc": "Client-extracted Noble Fates (Build #26823432) item values, batch yields, and crafting bench requirements.",
+    "dbCardDesc": "Search 30 extracted OctDats items across Foundry, Smithy, Brewery, and Kitchen.",
+    "mapTitle": "Noble Fates 1.0 Kingdom Resource & Raid Defense Checklist — DropCodex",
+    "mapDesc": "Interactive kingdom settlement checklist covering surface veins, deep shafts, fertile plots, and raid choke points.",
+    "mapCardDesc": "Track kingdom mining shafts, orchard zones, and raid defense milestones.",
+    "valuesTitle": "Noble Fates 1.0 Prestige & Trade Worth Benchmarks — DropCodex",
+    "valuesDesc": "Extracted Worth values for high-prestige Noble Fates gear and royal items."
+},
+  introParagraphs: [
+    "All 30 core production chains and native icons in this Noble Fates 1.0 workbench were parsed directly from the game's StreamingAssets/OctDats files (Steam Build #26823432, covering 464 items and 180 recipes) and cross-verified against the Foundry's 50% salvage recovery math to confirm exact per-batch output quantities.",
+    "Metallurgy and esteem highlights: Refining Steel Ingots at the Foundry combines Iron Ore with Coal/Charcoal before forging Steel Plate Mail or Fine Greatswords at the Smithy. High-esteem Noble bedrooms and Throne Rooms scale rapidly when stocked with Royal Crowns and aged Berry Wine.",
+    "Select any end-product in the calculator above to recursively sum raw Timber, Stone, Ore, and farm harvests per minute of crafter work."
+],
     art: {
       header: '/images/games/noble-fates/header.jpg',
       hero: '/images/games/noble-fates/hero.jpg',

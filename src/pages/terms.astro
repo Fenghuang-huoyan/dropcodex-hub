@@ -2,13 +2,24 @@
 import HubLayout from '../layouts/HubLayout.astro';
 import { hubConfig } from '../config/hub.config.mjs';
 ---
-<HubLayout title={`Terms of Service — ${hubConfig.brandName}`} description={`Terms of Service for using ${hubConfig.brandName} calculators, maps, and databases.`}>
+<HubLayout title={`Terms of Service — ${hubConfig.brandName}`} description={`Terms of Service, fan-content independence notice, and accuracy disclaimers for ${hubConfig.brandName}.`}>
   <section class="hero">
-    <span class="eyebrow">Legal</span>
+    <span class="eyebrow">Legal &amp; Disclaimers</span>
     <h1>Terms of Service</h1>
-    <p class="subtitle">Last updated: 23 November 2026.</p>
+    <p class="subtitle">Last updated: 28 November 2026 · Independent game utility reference.</p>
   </section>
-  <section class="card" style="margin-top:1.25rem;">
-    <p>All calculators, maps, and reference tables on {hubConfig.brandName} are provided "as is" for personal informational use. Game patches may alter recipes or item values at any time. All game trademarks belong to their respective owners.</p>
+  <section class="card" style="margin-top:1.25rem; display:grid; gap:0.9rem; line-height:1.65;">
+    <h2 style="margin:0; font-size:1.1rem;">1. Informational &amp; Personal Use</h2>
+    <p style="margin:0;">
+      All calculators, progression charts, item tables, and interactive maps published on <strong>{hubConfig.brandName}</strong> (<code>{hubConfig.domain}</code>) are provided free of charge on an "as is" basis for personal gameplay planning. Live game updates, hotfixes, or seasonal store rotations can alter crafting intervals, drop tables, or currency pack pricing at any time—always verify final values inside the official game client before committing resources or purchases.
+    </p>
+    <h2 style="margin:0; font-size:1.1rem;">2. Non-Affiliation &amp; Trademarks</h2>
+    <p style="margin:0;">
+      {hubConfig.brandName} is an independent community reference hub and is not affiliated with, endorsed by, or sponsored by Rockstar Games, Take-Two Interactive, NetEase Games, Marvel Games, Valve Corporation, Xobermon, Odd Meter, Hairy Heart Games, dux, or any other game publisher covered on this domain. All game titles, character names, icons, and store artwork remain the property of their respective copyright holders.
+    </p>
+    <h2 style="margin:0; font-size:1.1rem;">3. External Partner Links</h2>
+    <p style="margin:0;">
+      Certain game modules link to third-party digital gift-card or top-up platforms (such as LootBar) marked with <code>rel="sponsored noopener"</code>. {hubConfig.brandName} does not process payments, store user credentials, or fulfill digital orders; all transactions take place directly on the external platform under its own terms of sale and refund policies.
+    </p>
   </section>
 </HubLayout>

@@ -1,0 +1,32 @@
+DropCodex Image & Asset Attribution Manifest
+Last updated: 28 November 2026
+
+All official game header banners, capsules, screenshots, and unpacked client item sprites hosted under /images/games/<slug>/ belong to their respective copyright holders and are served locally for commentary, gameplay utility reference, and non-hotlinking archival purposes:
+
+1. Main Sequence (/images/games/main-sequence/)
+   - Developer / Publisher: Odd Meter / HypeTrain Digital (Steam AppID 3622250 / Demo 3640620)
+   - Store capsule & item icons extracted from Main Sequence Demo Build #26148731.
+
+2. Noble Fates (/images/games/noble-fates/)
+   - Developer / Publisher: Xobermon, LLC (Steam AppID 1769420 / Demo 4114570)
+   - Store capsule & item sprites extracted from Noble Fates Demo OctDats Build #20767119.
+
+3. We March as One (/images/games/we-march-as-one/)
+   - Developer / Publisher: dux (Steam AppID 5189160 / Demo 5403150)
+   - Store capsule & geometric unit icons extracted from Demo Build #26192930.
+
+4. No Asteroids (/images/games/no-asteroids/)
+   - Developer / Publisher: Hairy Heart Games (Steam AppID 3826200 / Demo 5527800)
+   - Store capsule & 24 mineral/module icons extracted from Demo v1.0.6 Build #26931893.
+
+5. Below the Stone (/images/games/below-the-stone/)
+   - Developer / Publisher: Strollart / Apogee Entertainment (Steam AppID 1170230)
+   - Official Steam CDN capsule artwork.
+
+6. Marvel Rivals (/images/games/marvel-rivals/)
+   - Developer / Publisher: NetEase Games / Marvel Games (Steam AppID 2767030)
+   - Official Steam CDN capsule artwork.
+
+7. Grand Theft Auto VI (/images/games/gta-6/)
+   - Developer / Publisher: Rockstar Games / Take-Two Interactive
+   - Original DropCodex procedural vector/SVG diagrams (no leaked or unlicensed Rockstar assets).

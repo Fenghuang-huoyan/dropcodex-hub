@@ -16,16 +16,30 @@ interface Props {
   game: GameModule;
 }
 const { game } = Astro.props;
+const seo = game.seo;
+const pageTitle = seo?.overviewTitle ?? `${game.title} Tools, Planner & Database — ${hubConfig.brandName}`;
+const pageDesc = seo?.overviewDesc ?? game.summary;
+const showMap = game.hasRealMap !== false;
+
+const breadcrumbLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: hubConfig.brandName, item: `${hubConfig.siteUrl}/` },
+    { '@type': 'ListItem', position: 2, name: game.title, item: `${hubConfig.siteUrl}/${game.slug}/` },
+  ],
+};
 ---
 <HubLayout
-  title={`${game.title} Tools, Crafting Calculator & Interactive Map — ${hubConfig.brandName}`}
-  description={`Interactive crafting ratio calculator, completion map tracker, and item database for ${game.title} (${game.releaseLabel}).`}
+  title={pageTitle}
+  description={pageDesc}
   ogImage={game.art.header}
+  jsonLd={breadcrumbLd}
 >
   <GameHero
     game={game}
     active="overview"
-    heading={`${game.title} Tools & Database`}
+    heading={`${game.title} — ${game.engine}`}
     subtitle={game.summary}
   />
 
@@ -34,27 +48,43 @@ const { game } = Astro.props;
   <div class="grid-cards">
     <div class="card">
       <span class="badge rarity-Legendary">Core Planner</span>
-      <h3 style="margin:0.55rem 0 0.4rem;">Crafting &amp; Throughput Calculator</h3>
+      <h3 style="margin:0.55rem 0 0.4rem;">{seo?.calcCardTitle ?? `${game.title} Planner & Calculator`}</h3>
       <p style="font-size:0.88rem; color:var(--muted); margin:0 0 1rem;">
-        Compute raw ore feedstock, multi-tier intermediate assemblies, machine counts, power draw (kW), and net value per minute.
+        {seo?.calcCardDesc ?? game.summary}
       </p>
-      <a class="btn" href={`/${game.slug}/calculator/`}>Launch Calculator →</a>
+      <a class="btn" href={`/${game.slug}/calculator/`}>Launch Planner →</a>
     </div>
-    <div class="card">
-      <span class="badge rarity-Rare">Progress Tracker</span>
-      <h3 style="margin:0.55rem 0 0.4rem;">Interactive Map &amp; Save Check</h3>
-      <p style="font-size:0.88rem; color:var(--muted); margin:0 0 1rem;">
-        Filter {game.mapPins.length} key resource veins, extraction pods, and boss nodes with persistent browser completion tracking.
-      </p>
-      <a class="btn" href={`/${game.slug}/map/`}>Open Interactive Map →</a>
-    </div>
+    {showMap && (
+      <div class="card">
+        <span class="badge rarity-Rare">Progress Tracker</span>
+        <h3 style="margin:0.55rem 0 0.4rem;">Interactive Map &amp; Progress Check</h3>
+        <p style="font-size:0.88rem; color:var(--muted); margin:0 0 1rem;">
+          {seo?.mapCardDesc ?? `Filter ${game.mapPins.length} verified coordinates and save completion progress locally in your browser.`}
+        </p>
+        <a class="btn" href={`/${game.slug}/map/`}>Open Interactive Map →</a>
+      </div>
+    )}
     <div class="card">
       <span class="badge rarity-Uncommon">Reference Index</span>
-      <h3 style="margin:0.55rem 0 0.4rem;">Filterable Item &amp; Recipe Database</h3>
+      <h3 style="margin:0.55rem 0 0.4rem;">Filterable Database ({game.items.length} Entries)</h3>
       <p style="font-size:0.88rem; color:var(--muted); margin:0 0 1rem;">
-        Search {game.items.length} indexed materials, modules, and equipment tiers by rarity, crafting time, and source facility.
+        {seo?.dbCardDesc ?? `Search ${game.items.length} indexed entries by category, rarity tier, base value, and unlock source.`}
       </p>
-      <a class="btn btn-outline" href={`/${game.slug}/database/`}>Browse Item Database →</a>
+      <a class="btn btn-outline" href={`/${game.slug}/database/`}>Browse Database →</a>
     </div>
   </div>
+
+  {game.introParagraphs && game.introParagraphs.length > 0 && (
+    <section class="card" style="margin-top:1.25rem;">
+      <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:0.5rem; margin-bottom:0.65rem;">
+        <h2 style="margin:0; font-size:1.12rem;">{game.title} — Mechanics, Formulas &amp; Verification Scope</h2>
+        <span class="badge">{game.statusBadge} · {game.releaseLabel}</span>
+      </div>
+      {game.introParagraphs.map((para) => (
+        <p style="margin:0 0 0.75rem; font-size:0.9rem; color:var(--text-dim); line-height:1.65;">
+          {para}
+        </p>
+      ))}
+    </section>
+  )}
 </HubLayout>

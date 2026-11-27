@@ -17,37 +17,37 @@ interface Props {
 }
 const { game } = Astro.props;
 const hasTrades = game.tradeValues.length > 0;
+const isTradingGame = Boolean(game.hasPlayerTrading);
+const pageTitle = game.seo?.valuesTitle ?? `${game.title} Economy & Tier Benchmark — ${hubConfig.brandName}`;
+const pageDesc = game.seo?.valuesDesc ?? game.summary;
 ---
 <HubLayout
-  title={`${game.title} Value List & Economy Reference — ${hubConfig.brandName}`}
-  description={`Item value index, demand ratings, and crafting profit margins for ${game.title}.`}
+  title={pageTitle}
+  description={pageDesc}
   ogImage={game.art.header}
+  noindex={!isTradingGame}
 >
   <GameHero
     game={game}
     active="values"
-    heading={`${game.title} Economy & Value Index`}
-    subtitle={
-      hasTrades
-        ? 'Compare high-tier item value scores, demand ratings, and market trends.'
-        : `${game.title} focuses on solo/co-op factory & progression loops. Use the Ratio Calculator to maximize value output per minute.`
-    }
+    heading={`${game.title} — Economy & Benchmark Index`}
+    subtitle={pageDesc}
   />
 
   <MonetizationBar game={game} />
 
   {hasTrades ? (
     <section class="card">
-      <h2 style="margin-top:0;">High-Tier Value Reference</h2>
+      <h2 style="margin-top:0;">{isTradingGame ? 'Market Value Reference' : 'Key Progression & Economy Benchmarks'}</h2>
       <div class="table-scroll">
         <table>
           <thead>
             <tr>
-              <th>Item</th>
-              <th>Value Score</th>
-              <th>Demand</th>
-              <th>Rarity</th>
-              <th>Trend</th>
+              <th>Benchmark Entry</th>
+              <th>Reference Score / Output</th>
+              {isTradingGame && <th>Demand</th>}
+              <th>Tier</th>
+              {isTradingGame && <th>Trend</th>}
             </tr>
           </thead>
           <tbody>
@@ -62,9 +62,9 @@ const hasTrades = game.tradeValues.length > 0;
                     </span>
                   </td>
                   <td><strong>{tv.score.toLocaleString('en-US')}</strong></td>
-                  <td>{tv.demand}/10</td>
+                  {isTradingGame && <td>{tv.demand}/10</td>}
                   <td><span class={`badge rarity-${tv.rarity}`}>{tv.rarity}</span></td>
-                  <td>{tv.trend}</td>
+                  {isTradingGame && <td>{tv.trend}</td>}
                 </tr>
               );
             })}
@@ -75,9 +75,9 @@ const hasTrades = game.tradeValues.length > 0;
   ) : (
     <section class="card">
       <p style="margin:0 0 0.85rem;">
-        Want to find the highest-margin assembly line in <strong>{game.title}</strong>? Open the recursive throughput planner:
+        Open the interactive planner for <strong>{game.title}</strong> to compute exact costs and breakpoints:
       </p>
-      <a class="btn" href={`/${game.slug}/calculator/`}>Launch {game.title} Ratio Calculator →</a>
+      <a class="btn" href={`/${game.slug}/calculator/`}>Launch {game.title} Planner →</a>
     </section>
   )}
 </HubLayout>
