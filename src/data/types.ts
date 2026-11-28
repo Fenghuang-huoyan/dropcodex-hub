@@ -42,7 +42,15 @@ export type QuickCodeEntry = {
   target: string;
   regionOrUnlock: string;
   codeOrCombo: string;
-  type: 'Safe Code' | 'Keypad / Door' | 'PS5 / Xbox Cheat' | 'Progression Gate' | 'Scanner Tier';
+  type:
+    | 'Safe Code'
+    | 'Keypad / Door'
+    | 'PS5 / Xbox Cheat'
+    | 'Progression Gate'
+    | 'Scanner Tier'
+    | 'Secret Weapon Code'
+    | 'Redeem Gift Code'
+    | 'Shop Figurine Gate';
   note: string;
 };
 
@@ -78,6 +86,8 @@ export type GameModule = {
   summary: string;
   hasRealMap?: boolean;
   hasPlayerTrading?: boolean;
+  calcStyle?: 'production' | 'economy';
+  unitSuffix?: string;
   seo?: GameSeoMeta;
   introParagraphs?: string[];
   art: {

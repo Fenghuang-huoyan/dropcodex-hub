@@ -19,7 +19,7 @@ const { game } = Astro.props;
 const pageTitle = game.seo?.dbTitle ?? `${game.title} Database & Reference Index — ${hubConfig.brandName}`;
 const pageDesc = game.seo?.dbDesc ?? game.summary;
 const lookupHeading = game.seo?.quickLookupHeading ?? 'Verified Unlock Breakpoints & Quick Reference';
-const isEconomyStyle = game.slug === 'marvel-rivals' || game.slug === 'gta-6' || game.slug === 'we-march-as-one';
+const isEconomyStyle = game.calcStyle === 'economy' || game.slug === 'marvel-rivals' || game.slug === 'gta-6' || game.slug === 'we-march-as-one';
 ---
 <HubLayout
   title={pageTitle}

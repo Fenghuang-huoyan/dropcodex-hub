@@ -2,7 +2,7 @@ import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import { hubConfig } from './src/config/hub.config.mjs';
 
-const NO_MAP_SLUGS = new Set(['marvel-rivals', 'gta-6', 'we-march-as-one']);
+const NO_MAP_SLUGS = new Set(['marvel-rivals', 'gta-6', 'we-march-as-one', 'hero-clash']);
 const TRADING_SLUGS = new Set([]); // Only enable /values/ in sitemap for games with live player trading
 
 export default defineConfig({

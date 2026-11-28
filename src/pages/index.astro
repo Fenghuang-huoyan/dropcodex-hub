@@ -313,7 +313,7 @@ const homeSchemas = [
           </h2>
         </div>
         <ul class="changelog-list">
-          {gamesRegistry.map((g) => (
+          {gamesRegistry.filter((g) => g.hasRealMap !== false).map((g) => (
             <li style="display:flex; align-items:center; justify-content:space-between; gap:0.5rem;">
               <div>
                 <strong style="display:block;">{g.title}</strong>

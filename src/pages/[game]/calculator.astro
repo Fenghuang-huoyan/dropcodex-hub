@@ -17,8 +17,8 @@ interface Props {
 }
 const { game } = Astro.props;
 const seo = game.seo;
-const isEconomyStyle = game.slug === 'marvel-rivals' || game.slug === 'gta-6' || game.slug === 'we-march-as-one';
-const unitSuffix = game.slug === 'gta-6' ? ' USD' : game.slug === 'marvel-rivals' ? ' Units' : ' pts';
+const isEconomyStyle = game.calcStyle === 'economy' || game.slug === 'marvel-rivals' || game.slug === 'gta-6' || game.slug === 'we-march-as-one';
+const unitSuffix = game.unitSuffix ?? (game.slug === 'gta-6' ? ' USD' : game.slug === 'marvel-rivals' ? ' Units' : ' pts');
 const mwUnitLabel = isEconomyStyle ? '' : ' MW · ';
 const kwUnitLabel = isEconomyStyle ? '' : ' kW · ';
 
@@ -164,6 +164,70 @@ const schemas = [
               data-aff-placement="mr-lattice-optimizer"
             >
               Check Live UID Lattice Price on LootBar →
+            </a>
+          )}
+        </div>
+      </div>
+    </div>
+  )}
+
+  {game.slug === 'hero-clash' && (
+    <div class="panel" style="margin-bottom:1.15rem;">
+      <div class="panel-head">
+        <div>
+          <h2 class="panel-title">Hero Clash — Red Diamonds UID Top-Up &amp; Split-Pack Optimizer</h2>
+          <div style="font-size:0.75rem; color:var(--text-dim); margin-top:0.15rem;">Compares Official In-App Retail ($2.99–$199.99) vs. Live UID Recharge Tiers ($2.65–$186.00) · Verified Nov 2026</div>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:0.35rem;">
+          <button class="btn btn-xs btn-outline hc-preset" type="button" data-hc-need="999" data-hc-have="0">999 Monthly Pass</button>
+          <button class="btn btn-xs btn-outline hc-preset" type="button" data-hc-need="1999" data-hc-have="0">1,999 Growth Fund</button>
+          <button class="btn btn-xs btn-outline hc-preset" type="button" data-hc-need="4999" data-hc-have="0">4,999 Event Pack</button>
+          <button class="btn btn-xs btn-outline hc-preset" type="button" data-hc-need="20000" data-hc-have="0">20,000 Whale Split</button>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap:0.85rem; margin-bottom:0.95rem;">
+          <label>
+            <span style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-dim); margin-bottom:0.3rem; text-transform:uppercase;">Target Red Diamonds Needed</span>
+            <input id="hc-need" class="input" type="number" min="100" max="200000" step="100" value="1999" />
+          </label>
+          <label>
+            <span style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-dim); margin-bottom:0.3rem; text-transform:uppercase;">Current Red Diamonds Owned</span>
+            <input id="hc-have" class="input" type="number" min="0" max="200000" step="50" value="0" />
+          </label>
+        </div>
+        <div class="stat-strip" style="margin-bottom:0.85rem;">
+          <div class="stat-pill">
+            <span>Cheapest UID Pack Combo</span>
+            <strong id="hc-combo" style="color:var(--sky);">1× (1,999 + 80) Pack</strong>
+          </div>
+          <div class="stat-pill">
+            <span>Official In-App Retail</span>
+            <strong id="hc-retail">$19.99 USD</strong>
+          </div>
+          <div class="stat-pill">
+            <span>UID Direct Top-Up Total</span>
+            <strong id="hc-uid-usd" style="color:var(--emerald);">$17.64 USD</strong>
+          </div>
+          <div class="stat-pill">
+            <span>Instant Savings + Bonus Left</span>
+            <strong id="hc-savings" style="color:var(--accent-bright);">Save $2.35 · +80 RD</strong>
+          </div>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:0.75rem; padding:0.75rem 0.95rem; border-radius:8px; background:var(--surface-2); border:1px solid var(--border);">
+          <div style="font-size:0.84rem; color:var(--text-dim);">
+            <strong style="color:var(--text);">No-Password UID Recharge:</strong> Enter only your Hero Clash Player ID &amp; International Server to lock in <strong id="hc-usd-inline" style="color:var(--emerald);">$17.64 USD</strong> (vs. <span id="hc-retail-inline">$19.99 USD</span> in-app).
+          </div>
+          {game.affiliateLinks?.lootbarUrl && (
+            <a
+              class="btn btn-primary"
+              href={game.affiliateLinks.lootbarUrl}
+              target="_blank"
+              rel="sponsored noopener"
+              data-aff-partner="lootbar"
+              data-aff-placement="hc-red-diamond-optimizer"
+            >
+              Top Up Hero Clash via UID on LootBar →
             </a>
           )}
         </div>
@@ -530,6 +594,103 @@ const schemas = [
       mrNeedEl.addEventListener('input', updateMr);
       mrHaveEl.addEventListener('input', updateMr);
       updateMr();
+    }
+
+    // Hero Clash dynamic programming Red Diamonds UID Top-Up & Split-Pack Optimizer
+    const hcNeedEl = document.getElementById('hc-need');
+    const hcHaveEl = document.getElementById('hc-have');
+    if (hcNeedEl && hcHaveEl) {
+      const HC_PACKS = [
+        { rd: 20799, uidCents: 18600, retailCents: 19999, label: '(19,999+800) Pack' },
+        { rd: 10399, uidCents: 8820, retailCents: 9999, label: '(9,999+400) Pack' },
+        { rd: 5199, uidCents: 4410, retailCents: 4999, label: '(4,999+200) Pack' },
+        { rd: 2599, uidCents: 2205, retailCents: 2499, label: '(2,499+100) Pack' },
+        { rd: 2079, uidCents: 1764, retailCents: 1999, label: '(1,999+80) Pack' },
+        { rd: 1559, uidCents: 1323, retailCents: 1499, label: '(1,499+60) Pack' },
+        { rd: 1039, uidCents: 882, retailCents: 999, label: '(999+40) Pack' },
+        { rd: 519, uidCents: 441, retailCents: 499, label: '(499+20) Pack' },
+        { rd: 299, uidCents: 265, retailCents: 299, label: '299 RD Pack' },
+      ];
+      function solveHc(shortfall, priceKey) {
+        if (shortfall <= 0) return { cost: 0, retail: 0, totalRd: 0, text: '0 Packs Needed' };
+        let prefix10k = 0;
+        let rem = shortfall;
+        if (rem > 32000) {
+          prefix10k = Math.floor((rem - 20000) / 10399);
+          rem -= prefix10k * 10399;
+        }
+        const maxCap = rem + 20799;
+        const dp = new Array(maxCap + 1).fill(Infinity);
+        const packsCnt = new Array(maxCap + 1).fill(Infinity);
+        const choice = new Array(maxCap + 1).fill(-1);
+        dp[0] = 0;
+        packsCnt[0] = 0;
+        for (let v = 0; v <= rem; v++) {
+          if (dp[v] === Infinity) continue;
+          for (let i = 0; i < HC_PACKS.length; i++) {
+            const nv = Math.min(maxCap, v + HC_PACKS[i].rd);
+            const nc = dp[v] + HC_PACKS[i][priceKey];
+            const np = packsCnt[v] + 1;
+            if (nc < dp[nv] || (nc === dp[nv] && np < packsCnt[nv])) {
+              dp[nv] = nc;
+              packsCnt[nv] = np;
+              choice[nv] = v * 16 + i;
+            }
+          }
+        }
+        let bestV = rem;
+        for (let v = rem; v <= maxCap; v++) {
+          if (dp[v] < dp[bestV] || (dp[v] === dp[bestV] && (packsCnt[v] < packsCnt[bestV] || (packsCnt[v] === packsCnt[bestV] && v > bestV)))) {
+            bestV = v;
+          }
+        }
+        const counts = new Array(HC_PACKS.length).fill(0);
+        let cur = bestV;
+        let guard = 0;
+        while (cur > 0 && choice[cur] !== -1 && guard++ < 600) {
+          const idx = choice[cur] % 16;
+          const prev = Math.floor(choice[cur] / 16);
+          counts[idx]++;
+          cur = prev;
+        }
+        counts[1] += prefix10k;
+        const totalRd = counts.reduce((s, c, i) => s + c * HC_PACKS[i].rd, 0);
+        const totalUid = counts.reduce((s, c, i) => s + c * HC_PACKS[i].uidCents, 0);
+        const totalRetail = counts.reduce((s, c, i) => s + c * HC_PACKS[i].retailCents, 0);
+        const parts = [];
+        counts.forEach((c, i) => { if (c > 0) parts.push(c + '× ' + HC_PACKS[i].label); });
+        return { cost: totalUid, retail: totalRetail, totalRd, text: parts.join(' + ') || '0 Packs' };
+      }
+      function updateHc() {
+        const need = Math.max(0, Math.min(200000, Math.round(parseFloat(hcNeedEl.value) || 0)));
+        const have = Math.max(0, Math.min(200000, Math.round(parseFloat(hcHaveEl.value) || 0)));
+        const shortfall = Math.max(0, need - have);
+        const bestUid = solveHc(shortfall, 'uidCents');
+        const bestRetail = solveHc(shortfall, 'retailCents');
+        const retailRef = Math.max(bestRetail.retail, bestUid.retail);
+        const savedCents = Math.max(0, retailRef - bestUid.cost);
+        const leftRd = Math.max(0, bestUid.totalRd - shortfall);
+        const uidStr = '$' + (bestUid.cost / 100).toFixed(2) + ' USD';
+        const retailStr = '$' + (retailRef / 100).toFixed(2) + ' USD';
+        document.getElementById('hc-combo').textContent = bestUid.text;
+        document.getElementById('hc-retail').textContent = retailStr;
+        document.getElementById('hc-uid-usd').textContent = uidStr;
+        document.getElementById('hc-savings').textContent = 'Save $' + (savedCents / 100).toFixed(2) + ' · +' + leftRd.toLocaleString('en-US') + ' RD';
+        const inlUsd = document.getElementById('hc-usd-inline');
+        const inlRet = document.getElementById('hc-retail-inline');
+        if (inlUsd) inlUsd.textContent = uidStr;
+        if (inlRet) inlRet.textContent = retailStr;
+      }
+      document.querySelectorAll('.hc-preset').forEach((b) => {
+        b.addEventListener('click', () => {
+          hcNeedEl.value = b.getAttribute('data-hc-need') || '1999';
+          hcHaveEl.value = b.getAttribute('data-hc-have') || '0';
+          updateHc();
+        });
+      });
+      hcNeedEl.addEventListener('input', updateHc);
+      hcHaveEl.addEventListener('input', updateHc);
+      updateHc();
     }
   </script>
 </HubLayout>

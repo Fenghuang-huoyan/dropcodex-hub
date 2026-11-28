@@ -8,6 +8,8 @@ import { belowTheStoneModule } from './games/below-the-stone';
 import { nobleFatesModule } from './games/noble-fates';
 import { marvelRivalsModule } from './games/marvel-rivals';
 import { noAsteroidsModule } from './games/no-asteroids';
+import { queensDomainModule } from './games/queens-domain';
+import { heroClashModule } from './games/hero-clash';
 
 export const gamesRegistry: GameModule[] = [
   mainSequenceModule,
@@ -17,6 +19,8 @@ export const gamesRegistry: GameModule[] = [
   nobleFatesModule,
   marvelRivalsModule,
   noAsteroidsModule,
+  queensDomainModule,
+  heroClashModule,
 ];
 
 export function getGameBySlug(slug: string): GameModule | undefined {
